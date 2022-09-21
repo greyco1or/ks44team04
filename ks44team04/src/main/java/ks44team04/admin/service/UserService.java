@@ -2,7 +2,6 @@ package ks44team04.admin.service;
 
 import ks44team04.admin.mapper.UserMapper;
 import ks44team04.dto.Level;
-import ks44team04.dto.Report;
 import ks44team04.dto.User;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class UserService {
         this.userMapper = userMapper;
     }
     
-
+    
 	//회원가입
 	public void addUser(User user) {
         int result = userMapper.addUser(user);
@@ -66,10 +65,4 @@ public class UserService {
         return loginUserInfo;
     }
     
-    //신고 리스트 
-    public List<Report> getReportList(){
-    	List<Report> reportList = userMapper.getReportList();
-		return reportList;
-	}
-
 }
