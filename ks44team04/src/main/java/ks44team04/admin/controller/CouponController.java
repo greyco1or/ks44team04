@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import ks44team04.service.CouponService;
 import ks44team04.dto.Coupon;
+import ks44team04.dto.CouponStatus;
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping("/admin/coupon")
 public class CouponController {
 	
 	
@@ -33,6 +34,20 @@ public class CouponController {
 		this.couponService = couponService;
 	}
 	
+	//쿠폰보유현황
+	@GetMapping("/couponStatus")
+	public String CouponStatus(Model model) {
+		
+		List<CouponStatus> couponStatus = couponService.couponStatus();
+		
+		model.addAttribute("title", "쿠폰보유현황");
+		model.addAttribute("couponStatus", couponStatus);
+		System.out.println(couponStatus);
+		
+		return "/admin/coupon/couponStatus";
+	}
+	
+	//쿠폰목록
 	@GetMapping("/couponList")
 	public String CouponList(Model model) {
 		
@@ -41,7 +56,7 @@ public class CouponController {
 		model.addAttribute("title", "쿠폰목록");
 		model.addAttribute("couponList", couponList);
 		
-		return "/admin/couponList";
+		return "/admin/coupon/couponList";
 	}
 	
 }

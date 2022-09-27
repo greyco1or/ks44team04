@@ -2,19 +2,19 @@ package ks44team04.dto;
 
 public class CouponStatus {
 
-    private String couponStatus;
+	private String couponStatusCode;
     private String couponCode;
     private String buyerId;
     private String adminId;
     private String couponIssueDate;
 
-    public String getCouponStatus() {
-        return couponStatus;
-    }
+    public String getCouponStatusCode() {
+		return couponStatusCode;
+	}
 
-    public void setCouponStatus(String couponStatus) {
-        this.couponStatus = couponStatus;
-    }
+	public void setCouponStatusCode(String couponStatusCode) {
+		this.couponStatusCode = couponStatusCode;
+	}
 
     public String getCouponCode() {
         return couponCode;
@@ -48,14 +48,11 @@ public class CouponStatus {
         this.couponIssueDate = couponIssueDate;
     }
 
-    @Override
-    public String toString() {
-        return "CouponStatus{" +
-                "couponStatus='" + couponStatus + '\'' +
-                ", couponCode='" + couponCode + '\'' +
-                ", buyerId='" + buyerId + '\'' +
-                ", adminId='" + adminId + '\'' +
-                ", couponIssueDate='" + couponIssueDate + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "CouponStatus [couponStatusCode=" + couponStatusCode + ", couponCode=" + couponCode + ", buyerId="
+				+ buyerId + ", adminId=" + adminId + ", couponIssueDate=" + couponIssueDate + "]";
+	}
+
+   
 }
