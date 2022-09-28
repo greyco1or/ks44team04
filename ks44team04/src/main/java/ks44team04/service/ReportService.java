@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportService {
+	//의존성 주입
 	 private final ReportMapper	reportMapper;
 	 
 	private static final Logger log = LoggerFactory.getLogger(ReportService.class);
@@ -26,6 +27,17 @@ public class ReportService {
     	   int result = reportMapper.setReport(report);
     	   log.info("신고 결과:" + result);
     }
+    
+    //신고 처리
+    public void reportProcessing(Report report) {
+    	reportMapper.reportProcessing(report);
+    }
+    
+    //특정 신고 리스트 가져오기 
+    public Report getReportHostryCode(String reportHistoryCode) {
+    	Report report = reportMapper.getReportHostryCode(reportHistoryCode);
+    	return report;
+    }
 
     //신고 리스트 
     public List<Report> getReportList(){
@@ -36,9 +48,9 @@ public class ReportService {
 	}
     
     //신고 등록 코드 증가 
-    public String getReportHistoryCode() {
-    	String reportHistoryCode = reportMapper.getReportHistoryCode();
-    	return reportHistoryCode;
+    public String getHistoryCode() {
+    	String HistoryCode = reportMapper.getHistoryCode();
+    	return HistoryCode;
     }
     
     //정지 리스트 
