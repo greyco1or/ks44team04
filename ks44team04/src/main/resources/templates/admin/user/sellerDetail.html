@@ -42,34 +42,6 @@
 </style>
 </th:block>
 
-<th:block layout:fragment="customTopJs">
-	<!-- jQuery -->
-	<script
-		src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-	<script>
-      let text = document.querySelector('#userAddr');
-      document.querySelector('#searchBtn').addEventListener('click', function () {
-
-        new daum.Postcode({
-          oncomplete: function (data) {
-            text.value = data.address;
-          }
-        }).open();
-      });
-
-      let text2 = document.querySelector('#farmAddr');
-      document.querySelector('#searchBtn2').addEventListener('click', function () {
-
-        new daum.Postcode({
-          oncomplete: function (data) {
-            text2.value = data.address;
-          }
-        }).open();
-      });
-
-    </script>
-</th:block>
-
 <th:block layout:fragment="customContents">
 
 	<!-- dd -->
@@ -109,11 +81,11 @@
 										<tr>
 											<td class="tableOdd col-md-1">회원권한</td>
 											<td class="tableEven">
- 												<input type="text" class="form-control text" id="userRight" name="userRight" th:value="*{rightDto.rightStatus}" readonly="readonly" />
+   												<input type="text" class="form-control text" id="userRight" name="userRight" th:value="*{rightList.rightStatus}" readonly="readonly" />
 											</td>
 											<td class="tableOdd col-md-1">회원등급</td>
 											<td class="tableEven">
- 												<input type="text" class="form-control text" id="userLevel" name="userLevel" th:value="*{levelSeller.levelName}" readonly="readonly" />
+  												<input type="text" class="form-control text" id="userLevel" name="userLevel" th:value="*{levelSeller.levelName}" readonly="readonly" />
 											</td>
 										</tr>
 										<tr>
@@ -134,6 +106,12 @@
 											<td class="tableOdd">닉네임</td>
 											<td class="tableEven col-md-4">
  												<input type="text" class="form-control text" id="userNickname" name="userNickname" th:value="*{userInfo.userNickname}" readonly="readonly" />
+											</td>
+										</tr>
+										<tr>
+											<td class="tableOdd">성별</td>
+											<td class="tableEven col-md-4" colspan="3">
+												<input type="text" class="form-control text" id="userGender" name="userGender" th:value="*{userInfo.userGender}" readonly="readonly" />
 											</td>
 										</tr>
 										<tr>
@@ -210,7 +188,7 @@
  												<div class="form-inline">
 													<input type="text" class="form-control text" style="width: 100px;" id="bankName" name="bankName" th:value="*{bankName}" readonly="readonly">
 													<input type="text" class="form-control text" style="width: 230px;" id="account" name="account" th:value="*{account}" readonly="readonly" />
-													<input type="text" class="form-control text" style="width: 100px;" id="accountholder" name="accountholder" th:value="*{accountHolder}" readonly="readonly" />
+													<input type="text" class="form-control text" style="width: 150px;" id="accountholder" name="accountholder" th:value="*{accountHolder}" readonly="readonly" />
 												</div>
 											</td>
 										</tr>
@@ -241,13 +219,13 @@
 										</tr>
 										<tr>
 											<td class="tableOdd">사업자등록증</td>
-											<td class="tableEven col-md-4" style="padding-top: 12px;">
-<!--  												<a th:href="/../static/images/license_img">[[${sellerInfo.licenceImg}]]</a>
- -->											</td>
+											<td class="tableEven col-md-4" style="padding: 16px;">
+  												<a href="#" th:text="${sellerInfo.licenceImg}" style="margin-left: 5px;"></a>
+											</td>
 											<td class="tableOdd">통신판매업신고증</td>
-											<td class="tableEven col-md-4" style="padding-top: 12px;">
-<!--  												<a href="#">[[${sellerInfo.onlineLicenceImg}]]</a>
- -->											</td>
+											<td class="tableEven col-md-4"  style="padding: 16px;">
+  												<a href="#" th:text="${sellerInfo.onlineLicenceImg}" style="margin-left: 5px;"></a>
+											</td>
 										</tr>
 										<tr>
 											<td class="tableOdd">승인요청일시</td>
@@ -262,12 +240,7 @@
 										<tr>
 											<td class="tableOdd">승인여부</td>
 											<td class="tableEven col-md-4">
- 												<label>
-													<input type="radio" class="flat" id="sellerCode" name="sellerApprove" th:value="*{approveCheck}" checked /> 승인 &nbsp; &nbsp; &nbsp;
-												</label>
-												<label>
-													<input type="radio" class="flat" name="sellerApprove" th:value="*{approveCheck}" /> 미승인
-												</label>
+ 												<input type="text" class="form-control text" id="approveCheck" name="approveCheck" th:value="*{approveCheck}" readonly="readonly" />
 											</td>
 											<td class="tableOdd">승인자</td>
 											<td class="tableEven col-md-4">
@@ -318,5 +291,23 @@
 			</div>
 		</div>
 	</div>
+</th:block>
+
+<th:block layout:fragment="customJsScript">
+    <script th:inline="javascript">
+
+	$(function() {
+		
+		var approveCheck = $('#approveCheck').val();
+		
+ 		if(approveCheck === 'Y') {
+			$('#approveCheck').attr('value','승인');
+		}else {
+			$('#approveCheck').prop('value','미승인');
+		} 
+	});
+
+    </script>
+    
 </th:block>
 </html>

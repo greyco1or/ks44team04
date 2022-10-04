@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.6.1.min.js"
-            integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" th:href="@{/build/css/bootstrap.min.css}">
+    <script th:src="@{/build/js/bootstrap.min.js}"></script>
+    <script th:src="@{/build/js/jquery-3.6.1.min.js}"></script>
 
     <style>
         .orderBtn {
-            width: 82px;
+            width: 90px;
         }
     </style>
 </head>
@@ -49,26 +45,49 @@
                     </ul>
                 </td>
                 <td th:text="${#strings.substring(l.order.orderDate, 0, 10)}">2022.09.26</td>
-                <td th:text="${l.order.orderNum}">12311234</td>
+                <td>
+                    <a class="text-decoration-none text-black-50" th:href="'/user/order/' + ${l.orderDetail.orderDetailCode}">[[${l.orderDetail.orderDetailCode}]]</a>
+                </td>
                 <td>
                     <div class="" th:text="${l.orderDetail.orderPrice} + '원'">30000원</div>
                     <div class="" th:text="${l.orderDetail.orderAmount} + '개'">1개</div>
                 </td>
                 <td>
                     <div th:text="${l.orderDetail.orderStatus}">결제완료</div>
-                    <button type="button" class="btn-sm" th:data-post-code="${l.orderDetail.postInfo}">배송조회</button>
+                    <button type="button" class="btn-sm" th:data-post-code="${l.orderDetail.postInfo}">배송조회
+                    </button>
                 </td>
                 <th:block th:switch="${l.orderDetail.orderStatus}">
                     <td th:case="결제완료">
-                        <button type="button" class="btn-sm orderBtn">주문취소</button>
+                        <button type="button" class="btn-sm orderBtn orderCancel"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">주문취소
+                        </button>
                     </td>
                     <td th:case="배송완료">
-                        <button type="button" class="btn-sm orderBtn">교환요청</button>
-                        <button type="button" class="btn-sm orderBtn">환불요청</button>
-                        <button type="button" class="btn-sm orderBtn">구매확정</button>
+                        <button type="button" class="btn-sm orderBtn orderExchange"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">교환요청
+                        </button>
+                        <button type="button" class="btn-sm orderBtn orderRefund"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">환불요청
+                        </button>
+                        <button type="button" class="btn-sm orderBtn orderConfirm"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">구매확정
+                        </button>
                     </td>
                     <td th:case="구매확정">
-                        <button type="button" class="btn-sm orderBtn">리뷰작성</button>
+                        <button type="button" class="btn-sm orderBtn writeReview"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">리뷰작성
+                        </button>
+                    </td>
+                    <td th:case="교환요청">
+                        <button type="button" class="btn-sm orderBtn openAddressModal" data-return="exchange"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">배송지입력
+                        </button>
+                    </td>
+                    <td th:case="환불요청">
+                        <button type="button" class="btn-sm orderBtn openAddressModal" data-return="refund"
+                                th:data-order-detail-code="${l.orderDetail.orderDetailCode}">배송지입력
+                        </button>
                     </td>
                 </th:block>
             </tr>
@@ -77,16 +96,91 @@
     </div>
 </div>
 
+<div id="addressInput" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content col-6">
+            <form id="addressModalForm" class="form-group " th:action="@{/user/order/returnaddress}" method="post">
+                <div class="mt-3">
+                    <label for="postCompany">배송업체</label>
+                    <input class="form-control" type="text" id="postCompany" name="postCompany" required>
+                </div>
+                <div class="mt-3">
+                    <label for="invoiceNumber">운송장번호</label>
+                    <input class="form-control" type="text" id="invoiceNumber" name="invoiceNumber" required>
+                </div>
+                <input type="hidden" id="postType" name="postType">
+                <input type="hidden" id="orderDetailCode" name="orderDetailCode">
+                <div class="text-right mt-3">
+                    <button id="addressRegister" class="btn btn-dark" type="submit">등록</button>
+                    <button id="closeAddressModal" class="btn btn-dark" type="button">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.querySelector('button').tagName
     document.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
             const postCode = e.target.dataset.postCode;
+            const orderDetailCode = e.target.dataset.orderDetailCode;
             if (postCode !== undefined) {
-                location.href = `/user/regularpost/postcheck/${postCode}`;
+                const url = `/user/order/postcheck/${postCode}`;
+                window.open(url, 'postCheck', '_blank');
+            }
+            if (e.target.classList.contains('orderCancel')) {
+
+            }
+            if (e.target.classList.contains('orderExchange')) {
+                let open = window.open(`/user/order/exchange/${orderDetailCode}`);
+                let openInterval = window.setInterval(function () {
+                    if (open.closed) {
+                        window.setTimeout(function () {
+                            open.close();
+                        }, 300);
+                        location.replace(location.href);
+                        window.clearInterval(openInterval);
+                    }
+                }, 500)
+            }
+
+            if (e.target.classList.contains('orderRefund')) {
+
+            }
+            if (e.target.classList.contains('orderConfirm')) {
+                if (confirm('구매확정하시겠습니까?')) {
+                    fetch(`/user/order/confirm/${orderDetailCode}`)
+                        .catch(() => {
+                            alert('구매확정을 실패했습니다. 다시 시도해주세요')
+                        })
+                        .finally(() => {
+                            location.replace(location.href);
+                        });
+                }
+            }
+            if (e.target.classList.contains('writeReview')) {
+
             }
         }
     });
+
+    const buyConfirm = function () {
+        this.dataset
+    }
+
+    // 배송지 입력 모달
+    document.querySelectorAll(".openAddressModal").forEach(function (node) {
+        node.addEventListener('click', function () {
+            document.querySelector("#addressInput").style.display = "block";
+            document.querySelector("#postType").value = this.dataset.return;
+            document.querySelector("#orderDetailCode").value = this.dataset.orderDetailCode;
+        });
+    });
+    document.querySelector("#closeAddressModal").addEventListener('click', function () {
+        document.querySelector("#addressInput").style.display = "none";
+        document.querySelector("#addressModalForm").reset();
+    });
+
 </script>
 </body>
 </html>

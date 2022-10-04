@@ -20,4 +20,6 @@ public class RegularPostService {
     public List<RegularPostHistory> getRegularPostHistory(String userId) {
         return regularPostMapper.getRegularPostHistory(userId);
     }
+
+
 }

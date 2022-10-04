@@ -44,6 +44,19 @@
                  inner join tb_order t
                             on tod.order_num = t.order_num
         where trps.buyer_id = #{userId}
+        order by tod.order_detail_code desc
     </select>
+
+    <update id="setOrderConfirm" parameterType="String">
+        update tb_order
+        set order_status = '구매확정',
+            final_confirm_date = now()
+        where order_num = #{orderNum}
+    </update>
+
+
+
+
+
 
 </mapper>

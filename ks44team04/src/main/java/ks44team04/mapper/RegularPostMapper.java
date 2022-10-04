@@ -10,4 +10,6 @@ public interface RegularPostMapper {
 
     public List<RegularPostHistory> getRegularPostHistory(String userId);
 
+
+
 }

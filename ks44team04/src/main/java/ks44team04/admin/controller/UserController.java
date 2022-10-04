@@ -1,7 +1,6 @@
 package ks44team04.admin.controller;
 
 import ks44team04.service.UserService;
-import ks44team04.dto.Right;
 import ks44team04.dto.Seller;
 import ks44team04.dto.Dormant;
 import ks44team04.dto.Goods;
@@ -9,7 +8,7 @@ import ks44team04.dto.Leave;
 import ks44team04.dto.LevelBuyerCategory;
 import ks44team04.dto.LevelSellerCategory;
 import ks44team04.dto.Login;
-
+import ks44team04.dto.Right;
 import ks44team04.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +38,18 @@ public class UserController {
     }
 
     
+    @PostMapping("/user/addSeller")
+    public String addSeller(Seller seller) {
+    	log.info("사용자가 입력한 회원의 정보 ::: {}", seller);
+    	
+    	System.out.println("사용자가 입력한 회원의 정보 -> " + seller);
+    	userService.addSeller(seller);
+    	
+    	return "redirect:/admin/user/sellerList";
+    }
+    
 	@PostMapping("/user/addUser")
     public String addUser(User user) {
-		
 		log.info("사용자가 입력한 회원의 정보 ::: {}", user);
 		
         System.out.println("사용자가 입력한 회원의 정보 -> " + user);
@@ -53,26 +61,55 @@ public class UserController {
 	@GetMapping("/user/addUser")
 	public String addUserForm(Model model) {
 		
-		List<Right> RightList = userService.getRightList();
-		model.addAttribute("title", "회원가입");
-		model.addAttribute("RightList", RightList);
+		List<LevelBuyerCategory> levelBuyer = userService.getLevelBuyer();
+        log.info("구매자 레벨 ::: {}",levelBuyer);
+		List<Right> rightList = userService.getRightList();
+		log.info("권한 ::: {}",rightList);
+		
+		model.addAttribute("title", "회원등록");
+		model.addAttribute("levelBuyer", levelBuyer);
+		model.addAttribute("rightList", rightList);
 		
 		return "admin/user/addUser";
+	}
+	
+	//회원 수정
+	@PostMapping("/user/modifyUser")
+	public String modifyUser(User user) {
+		
+		log.info("회원정보 수정 정보 ::: {}", user);
+		userService.modifyUser(user);
+		
+		return "redirect:/admin/user/userList";
+	}
+	
+	//회원수정(저장된 정보 가져오기)
+	@GetMapping("/user/modifyUser")
+	public String modifyUser(@RequestParam(value="userId", required = false) String userId
+							  ,Model model) {
+        User userInfo = userService.getUserInfoById(userId);
+        log.info("회원정보 ::: {}",userInfo);
+        List<LevelBuyerCategory> levelBuyer = userService.getLevelBuyer();
+        List<Right> rightList = userService.getRightList();
+        
+		model.addAttribute("title", "회원정보수정");
+		model.addAttribute("userInfo", userInfo);
+		model.addAttribute("levelBuyer", levelBuyer);
+		model.addAttribute("rightList", rightList);
+		
+		return "admin/user/modifyUser";
 	}
 	
 	//특정 판매자 상세정보 조회
 	@GetMapping("/user/sellerDetail")
 	public String sellerDetail(@RequestParam(value="sellerId", required = false) String sellerId
-							  ,Model model) {
+							   ,Model model) {
         Seller userInfoS = userService.getUserInfoByIdS(sellerId);
         log.info("회원 상세정보 조회(판매자만) ::: {}",userInfoS);
-        
         Seller sellerInfo = userService.getSellerInfoById(sellerId);
         log.info("판매자 상세정보 조회 ::: {}",sellerInfo);
-        
         List<Goods> goodsList = userService.getGoodsList(sellerId);
         log.info("판매자 판매상품 목록 ::: {}",goodsList);
-
         
 		model.addAttribute("title", "판매자 상세정보");
 		model.addAttribute("userInfoS", userInfoS);

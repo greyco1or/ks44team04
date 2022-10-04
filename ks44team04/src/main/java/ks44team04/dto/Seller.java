@@ -11,6 +11,7 @@ public class Seller {
     private String accountHolder;
     private String licenceNum;
     private String storeAddress;
+    private String storeAddress2;
     private String storePhone;
     private String storeEmail;
     private String licenceImg;
@@ -22,7 +23,7 @@ public class Seller {
     private User userInfo;
     private Goods goodsList;
     private LevelSellerCategory levelSeller;
-    private Right rightDto;
+    private Right rightList;
 
     public String getSellerCode() {
 		return sellerCode;
@@ -94,6 +95,14 @@ public class Seller {
 
 	public void setStoreAddress(String storeAddress) {
 		this.storeAddress = storeAddress;
+	}
+
+	public String getStoreAddress2() {
+		return storeAddress2;
+	}
+
+	public void setStoreAddress2(String storeAddress2) {
+		this.storeAddress2 = storeAddress2;
 	}
 
 	public String getStorePhone() {
@@ -184,12 +193,12 @@ public class Seller {
 		this.levelSeller = levelSeller;
 	}
 
-	public Right getRightDto() {
-		return rightDto;
+	public Right getRightList() {
+		return rightList;
 	}
 
-	public void setRightDto(Right rightDto) {
-		this.rightDto = rightDto;
+	public void setRightList(Right rightList) {
+		this.rightList = rightList;
 	}
 
 	@Override
@@ -204,6 +213,7 @@ public class Seller {
                 ", accountHolder='" + accountHolder + '\'' +
                 ", licenseNum='" + licenceNum + '\'' +
                 ", storeAddress='" + storeAddress + '\'' +
+                ", storeAddress2='" + storeAddress2 + '\'' +
                 ", storePhone='" + storePhone + '\'' +
                 ", storeEmail='" + storeEmail + '\'' +
                 ", licenseImg='" + licenceImg + '\'' +
@@ -214,7 +224,7 @@ public class Seller {
                 ", approveId='" + approveId + '\'' +
                 ", userInfo='" + userInfo + '\'' +
                 ", goodsList='" + goodsList + '\'' +
-                ", rightDto='" + rightDto + '\'' +
+                ", rightList='" + rightList + '\'' +
                 ", levelSeller='" + levelSeller + '\'' +
                 '}';
     }
