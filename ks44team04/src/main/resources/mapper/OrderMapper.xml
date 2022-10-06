@@ -138,7 +138,27 @@
                             on tod.goods_code = tg.goods_code
                  inner join tb_order t
                             on tod.order_num = t.order_num
-        where t.buyer_id = #{userId}
+                where t.buyer_id = #{userId}
+        order by order_detail_code desc
+    </select>
+    <select id="getOrderListOn" parameterType="String" resultMap="orderDetailResultMap">
+        select *
+        from tb_order_detail as tod
+                 inner join tb_goods tg
+                            on tod.goods_code = tg.goods_code
+                 inner join tb_order t
+                            on tod.order_num = t.order_num
+        where tg.seller_id = #{sellerId} and tod.order_status not regexp '반품|환불|교환|취소'
+        order by order_detail_code desc
+    </select>
+    <select id="getOrderListOff" parameterType="String" resultMap="orderDetailResultMap">
+        select *
+        from tb_order_detail as tod
+                 inner join tb_goods tg
+                            on tod.goods_code = tg.goods_code
+                 inner join tb_order t
+                            on tod.order_num = t.order_num
+        where tg.seller_id = #{sellerId} and tod.order_status regexp #{status}
         order by order_detail_code desc
     </select>
 
@@ -159,9 +179,15 @@
     <select id="getOrderNum" resultType="String">
         select max(order_num)
         from tb_order
-        where order_num like concat('', '#');
-
+        where order_num like concat( (curdate() + 0), '%' );
     </select>
+    
+    <insert id="setOrderDetail" parameterType="OrderDetail">
+        insert into tb_order_detail (order_detail_code, order_num, goods_code, order_amount, order_og_price, order_price,
+                                     order_status, refund_check, auto_confirm_date)
+        values (#{orderDetailCode}, #{orderNum}, #{goodsCode}, #{orderAmount}, #{orderOgPrice}, #{orderPrice}, '주문처리중',
+                'Y', date_add(now(), interval 7 day));
+    </insert>
 
 </mapper>
 

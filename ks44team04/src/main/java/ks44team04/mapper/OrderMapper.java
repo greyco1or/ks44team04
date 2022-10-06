@@ -24,8 +24,15 @@ public interface OrderMapper {
                                      @Param(value = "orderStatus") String orderStatus);
 
     public List<OrderDetail> getOrderList(String userId);
+    public List<OrderDetail> getOrderListOn(String sellerId);
+    public List<OrderDetail> getOrderListOff(@Param(value = "sellerId") String sellerId,
+                                             @Param(value = "status") String status);
 
     public Goods getGoodsInfo(String goodsCode);
 
     public void setOrder(Order order);
+
+    public String getOrderNum();
+
+    public void setOrderDetail(OrderDetail orderDetail);
 }
