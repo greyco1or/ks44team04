@@ -39,6 +39,8 @@ public class BoardController {
 									,@RequestParam(name="searchValue", required=false, defaultValue="") String searchValue
 									,@RequestParam(name="searchKey2",defaultValue="") String searchKey2
 									,@RequestParam(name="searchCateName", required = false, defaultValue = "") String searchCateName
+									,@RequestParam(name="firstDate", required = false, defaultValue = "") String firstDate
+									,@RequestParam(name="lastDate", required = false, defaultValue = "") String lastDate
 									,Model model) {
 		
 		if("boardTitle".equals(searchKey)) {
@@ -60,6 +62,8 @@ public class BoardController {
 		paramMap.put("searchValue", searchValue);
 		paramMap.put("searchKey2", searchKey2);
 		paramMap.put("searchCateName", searchCateName);
+		paramMap.put("firstDate", firstDate);
+		paramMap.put("lastDate", lastDate);
 		
 		List<Board> boardList = boardService.getBoardListSearch(paramMap);
 		
@@ -69,6 +73,8 @@ public class BoardController {
 		model.addAttribute("searchValue", searchValue);
 		model.addAttribute("searchKey2", searchKey2);
 		model.addAttribute("searchCateName", searchCateName);
+		model.addAttribute("firstDate", firstDate);
+		model.addAttribute("lastDate", lastDate);
 		
 		return "/admin/board/boardList";
 	}
@@ -88,6 +94,8 @@ public class BoardController {
 											,@RequestParam(name="searchValue", required=false, defaultValue="") String searchValue
 											,@RequestParam(name="searchKey2",defaultValue="") String searchKey2
 											,@RequestParam(name="searchCateName", required = false, defaultValue = "") String searchCateName
+											,@RequestParam(name="firstDate", required = false, defaultValue = "") String firstDate
+											,@RequestParam(name="lastDate", required = false, defaultValue = "") String lastDate
 											,Model model) {
 		
 		if("commentContent".equals(searchKey)) {
@@ -105,6 +113,8 @@ public class BoardController {
 		paramMap.put("searchValue", searchValue);
 		paramMap.put("searchKey2", searchKey2);
 		paramMap.put("searchCateName", searchCateName);
+		paramMap.put("firstDate", firstDate);
+		paramMap.put("lastDate", lastDate);
 		
 		List<BoardComment> boardCommentList = boardService.getBoardCommentListSearch(paramMap);
 		
@@ -114,6 +124,8 @@ public class BoardController {
 		model.addAttribute("searchValue", searchValue);
 		model.addAttribute("searchKey2", searchKey2);
 		model.addAttribute("searchCateName", searchCateName);
+		model.addAttribute("firstDate", firstDate);
+		model.addAttribute("lastDate", lastDate);
 		
 		return "/admin/board/boardComment";
 	}
@@ -133,6 +145,8 @@ public class BoardController {
 							  			,@RequestParam(name="searchValue", required=false, defaultValue="") String searchValue
 							  			,@RequestParam(name="searchKey2",defaultValue="") String searchKey2
 							  			,@RequestParam(name="searchCateName", required = false, defaultValue = "") String searchCateName
+							  			,@RequestParam(name="firstDate", required = false, defaultValue = "") String firstDate
+										,@RequestParam(name="lastDate", required = false, defaultValue = "") String lastDate
 							  			,Model model) {
 		
 		if("userId".equals(searchKey)) {
@@ -148,6 +162,8 @@ public class BoardController {
 		paramMap.put("searchValue", searchValue);
 		paramMap.put("searchKey2", searchKey2);
 		paramMap.put("searchCateName", searchCateName);
+		paramMap.put("firstDate", firstDate);
+		paramMap.put("lastDate", lastDate);
 		
 		List<BoardLike> boardLikeList = boardService.getBoardLikeListSearch(paramMap);
 		
@@ -157,6 +173,9 @@ public class BoardController {
 		model.addAttribute("searchValue", searchValue);
 		model.addAttribute("searchKey2", searchKey2);
 		model.addAttribute("searchCateName", searchCateName);
+		model.addAttribute("firstDate", firstDate);
+		model.addAttribute("lastDate", lastDate);
+
 		
 		return "/admin/board/boardLike";
 	}	

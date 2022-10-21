@@ -3,6 +3,7 @@ package ks44team04.service;
 import ks44team04.dto.PostInfo;
 import ks44team04.mapper.AddressMapper;
 import ks44team04.dto.AddressList;
+import ks44team04.mapper.OrderMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +20,8 @@ public class AddressService {
         this.addressMapper = addressMapper;
     }
 
-    public List<AddressList> getAddressList(Map addressInfo) {
-        List<AddressList> addressLists = addressMapper.getAddressList(addressInfo);
-        return addressLists;
+    public List<AddressList> getAddressList(Map<String, String> addressInfo) {
+        return addressMapper.getAddressList(addressInfo);
     }
 
     public String getAddressListCode() {
@@ -46,4 +46,7 @@ public class AddressService {
     }
 
 
+    public void setPostInfo(PostInfo postInfo) {
+        addressMapper.setPostInfo(postInfo);
+    }
 }

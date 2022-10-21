@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layout/adminDefault}">
+<!-- 드래그 앤 드롭 라이브러리 -->
+<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
 
 <th:block layout:fragment="customTitle">
 	<title th:text="${title}"></title>
@@ -21,6 +23,10 @@
 .chk_box input[type="checkbox"]:checked + .on:after { display: block; }
 .on:after { width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; -webkit-transform: rotate(45deg); -ms-transform: rotate(45deg); transform: rotate(45deg); position: absolute; left: 6px; top: 4px; }
 
+.fileRemove{
+	border:1px solid #73879c;
+	border-radius: 4px;	
+}
 .firstMenu{
 	margin-top: 5px;
 }
@@ -31,7 +37,7 @@
 	color: slategray; margin-top: 8px; margin-bottom: -3px;
 }
 .imgExplain{
-	color: gray; margin-left: 85px; margin-top: 10px;
+	color: gray; margin-top: 5px;
 }
 .addTitle{
 	margin-right: 10px;
@@ -51,6 +57,56 @@
 .numberTitle{
 	margin-top: -6px;
 }
+
+
+/* 이미지관련 */
+.inputFile{
+    margin-bottom: 10px;
+}
+.uploadfile,
+#imgPreview,
+#imgPreview li{
+    float:left
+}
+/* img버튼 css*/
+.addImgBtn{
+	margin-left:20px;
+	margin-top:30px;
+	float:left;
+    width: 50px;
+    height: 50px;
+    color: #cacaca;
+    border: 2px solid #b7b7b7;
+	border-radius: 4px;
+    font-size: 35px !important;
+    text-align: center;
+}
+/* 미리보기 css */
+#imgPreview li{
+    margin-left: 10px;
+    margin-bottom: 10px;
+    position: relative;
+    border: 1px solid #ececec;
+    cursor:move;
+    list-style-type : none;
+}
+/* 이미지 삭제버튼 css */
+.delBtn{
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    font-size: 13px;
+    background-color: #73879c;
+    color: #fff;
+    width: 18px;
+    height: 18px;
+    line-height: 16px;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    border-radius : 50px;
+    border: 1px solid #73879c;
+}
 </style>
 </th:block>
 
@@ -61,7 +117,7 @@
 		</div>
 	</div>
 
-<form id="goodsAddForm" th:action="@{/admin/goods/goodsAdd}" method="post">
+<form id="goodsAddForm" th:action="@{/admin/goods/goodsAdd}" method="post" enctype="multipart/form-data">
 	<div class="x_panel">
 		<div>
 			<h5>
@@ -100,6 +156,10 @@
 				<div class="firstMenu form-inline">
 					<label class="addTitle control-label" for="goodsName">상품명</label>
 						<input type="text" class="form-control" id="goodsName" name="goodsName" required="required" size="30">
+				</div>
+				<div class="firstMenu form-inline" style="margin-top:15px;">
+					<label class="addTitle control-label" for="goodsContent">상품정보</label>
+						<textarea class="form-control" id="goodsContent" name="goodsContent" required="required" style="width:300px; height:70px; resize: none;"></textarea>
 					<p class="explain">
 						상품명 최대 30글자까지 입력가능하며, 일부 특수문자를 포함한 금칙어는 상품명으로 사용할 수 없습니다.<br>
 						판매 상품과 직접 관련이 없는 다른 상품명, 스팸성 키워드 입력 시 관리자에 의해 판매 금지될 수 있습니다.</p>
@@ -206,22 +266,17 @@
 			</h5>
 			<div class="clearfix"></div>
 		</div>
-
 		<div class="x_content2">
 			<div class="well well-sm">
-				<div class="firstMenu form-inline">
-					<label class="imgTitle control-label" for="goodsFile">대표이미지</label>
-					<img src="gom.png" class="img img-thumbnail" alt="대표이미지" id="goodsFile" name="goodsFile">
+				<div class="filebox firstMenu form-inline">
+					<div class="inputFile" style="width:100%; height:105px;">
+						<label class="addImgBtn" for="uploadfile">+</label>
+						<input type="file" name="uploadfile" id="uploadfile" class="upload-hidden" multiple="multiple" style="display:none;">
+						<ul id="imgPreview" class="sortable"></ul>
+					</div>
 				</div>
-				<p class="imgExplain">권장 크기 : 640 x 640 (윈도대상 750 x 1000)</p>
-
-				<div class="firstMenu form-inline">
-					<label class="imgTitle control-label">추가이미지</label>
-						<img id="preview" class="img img-thumbnail">
-						<input type="file" onchange="readURL(this);" style="margin-left: 85px; margin-top: 5px;">
-				</div>
-				<p class="imgExplain">권장 크기 : 640 x 640 (윈도대상 750 x 1000)</p>
 				<hr class="hrStyle" align="left">
+				<p class="imgExplain">권장 크기 : 640 x 640 (윈도대상 750 x 1000)</p>
 				<p class="explain">
 					대표이미지 1장은 필수, 추가이미지는 최대 5장까지 등록할 수 있습니다.<br>
 					추가 이미지는 상세페이지 화면에서 이미지를 클릭하여 크게 볼 수 있습니다.<br>
@@ -239,7 +294,7 @@
 		<div class="x_content2">
 			<div class="well well-sm">
 				<div class="form-inline form-group" style="margin-top: 20px;">
- 					<textarea class="summernote" id="goodsContent" name="goodsContent"></textarea>
+ 					<textarea class="summernote" id="goodsDetail" name="goodsDetail"></textarea>
  				</div>
  				<p class="explain">
  					상세설명 권장 크기 : 가로 860px <br>
@@ -258,153 +313,242 @@
 </th:block>
 
 <th:block layout:fragment="customJsScript">
-	<th:block th:replace="/fragments/userJs :: datatablesFragment"></th:block>
-    <script src="/build/summernote.min.js"></script>
-    <!-- 스크롤이 자꾸 아래로 가서 넣음 -->
-    <script>history.scrollRestoration = "manual"</script>
+<th:block th:replace="fragments/userJs :: datatablesFragment"></th:block>
+<!-- 드래그앤드롭 라이브러리 -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" ></script>
+<script src="/build/summernote.min.js"></script>
+<!-- 스크롤이 자꾸 아래로 가서 넣음 -->
+<script>history.scrollRestoration = "manual"</script>
+<script th:inline="javascript">
+
+$(function(){
+    /* 썸머노트 설정 */
+	$(document).ready(function() {
+    	$('.summernote').summernote({
+			height: 300,           //에디터 높이
+			minHeight: null,       //최소 높이
+			maxHeight: null,       //최대 높이
+			lang: "ko-KR",
+			toolbar: [ ['fontname', ['fontname']],
+			           ['fontsize', ['fontsize']],
+			    	   ['style', ['bold', 'italic', 'underline','strikethrough', 'clear']],
+			    	   ['color', ['forecolor','color']],
+			    	   ['table', ['table']],
+			    	   ['para', ['ul', 'ol', 'paragraph']],
+			   	 	   ['height', ['height']],
+			    	   ['insert',['picture','link','video']],
+			    	   ['view', ['fullscreen', 'help']] ],
+			fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New','맑은 고딕','궁서','굴림체','굴림','돋음체','바탕체'],
+			fontSizes: ['8','9','10','11','12','14','16','18','20','22','24','28','30','36','50','72']
+		});
+	});
     
-	<script th:inline="javascript">
     
-	$(function(){
-	    /* 썸머노트 설정 */
-		$(document).ready(function() {
-	    	$('.summernote').summernote({
-				height: 300,           //에디터 높이
-				minHeight: null,       //최소 높이
-				maxHeight: null,       //최대 높이
-				lang: "ko-KR",
-				toolbar: [ ['fontname', ['fontname']],
-				           ['fontsize', ['fontsize']],
-				    	   ['style', ['bold', 'italic', 'underline','strikethrough', 'clear']],
-				    	   ['color', ['forecolor','color']],
-				    	   ['table', ['table']],
-				    	   ['para', ['ul', 'ol', 'paragraph']],
-				   	 	   ['height', ['height']],
-				    	   ['insert',['picture','link','video']],
-				    	   ['view', ['fullscreen', 'help']] ],
-				fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New','맑은 고딕','궁서','굴림체','굴림','돋음체','바탕체'],
-				fontSizes: ['8','9','10','11','12','14','16','18','20','22','24','28','30','36','50','72']
-			});
-		});
-	    	
-		/* 숫자만 입력  & 숫자 천단위 콤마 찍기  */
-		$('.numberInput').on('input',function(){
-			$(this).val($(this).val().replace(/[^0-9.]/g,'').replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,'));
-		});
-	    	
-		/* input 할인율 숫자 99까지만 입력 가능하게 하기 */
-		$('.disRate').on("keyup",function() {
-			var val= $(this).val();
-			if(val < 1 || val > 99) {
-			$(this).val('');
-			}
-		});
-	    	
-	    /* 판매가, 할인율 입력 시 자동 계산 후 할인가 입력 */
-		$('.disRate, .salePrice').on('change',function(){
-			if ($('.salePrice').val() != null && $('.goodsPrice').val() != '') {
-				var salePrice = Number($('.salePrice').val().replace(/,/g, ""));
-				var disRate = Number($('.disRate').val());
-				var discounted = salePrice * disRate / 100;
-				//할인가 콤마 넣기
-				$('#hiddenDiscount').val(discounted);
-				var hiddenDiscount = $('#hiddenDiscount').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
-				$('.discountVal').text( hiddenDiscount );
-				//할인금액 콤마 넣기
-				$('#hiddenPrice').val(salePrice - discounted);
-				var hiddenPrice = $('#hiddenPrice').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
-				$('.discountPrice').text( hiddenPrice );
-	    	} 
-		});
-	   
-	    /* form 전송 */ 
-		$('#goodsAddForm').submit(function(event) {
-		});
-		  
-		$('#goodsAddBtn').click(function () {
-			//판매가, 배송비 결과값 콤마 없애기
-			$('.salePrice').val( Number($('.salePrice').val().replace(/,/g, "")) );
-			$('.postPrice').val( Number($('.postPrice').val().replace(/,/g, "")) );
-		 
-			$('#goodsAddForm').submit();
-		});
-		
-		/* 대분류 선택시 중분류 카테고리 나오게 하기 */
-		var largeCategoryList = /*[[${largeCategoryList}]]*/
-			console.log(largeCategoryList)
-		var largeCate = $(".largeCate");
-		var smallCate = $(".smallCate");
-		
-		//대분류 <option> 태그
-		for(var large of largeCategoryList){
-			var largeCode = large.goodsLargeCategory;
-			var largeName = large.goodsCategory;
-			console.log('largeCode: '+large.goodsLargeCategory)
-			console.log('largeName: '+large.goodsCategory)
-			
-			largeCate.append("<option value='"+ largeCode +"'>" + largeName + "</option>");
+	/* 숫자만 입력  & 숫자 천단위 콤마 찍기  */
+	$('.numberInput').on('input',function(){
+		$(this).val($(this).val().replace(/[^0-9.]/g,'').replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,'));
+	});
+    	
+	/* input 할인율 숫자 99까지만 입력 가능하게 하기 */
+	$('.disRate').on("keyup",function() {
+		var val= $(this).val();
+		if(val < 1 || val > 99) {
+		$(this).val('');
 		}
-		//대분류 option 클릭 시 중분류 변화
-		$(largeCate).on("change",function(){
-			smallCate.children().remove();
-			smallCate.append("<option value='none'>::</option>")
-				
-			for(var large of largeCategoryList){
-				var selectLarge = $(this).find("option:selected").val();	
-				console.log(selectLarge);
-				
-				for(var small of large.goodsSmallCategoryInfo){
-					var largeCode2 = small.goodsLargeCategory;
-					var smallCode = small.goodsSmallCategory;
-					var smallName = small.smallCategoryName;
-							
-					console.log('largeCode2: '+largeCode2);
-					console.log('smallCode: '+smallCode);
-					console.log('smallName: '+smallName);
+	});
+    	
+    /* 판매가, 할인율 입력 시 자동 계산 후 할인가 입력 */
+	$('.disRate, .salePrice').on('change',function(){
+		if ($('.salePrice').val() != null && $('.goodsPrice').val() != '') {
+			var salePrice = Number($('.salePrice').val().replace(/,/g, ""));
+			var disRate = Number($('.disRate').val());
+			var discounted = salePrice * disRate / 100;
+			//할인가 콤마 넣기
+			$('#hiddenDiscount').val(discounted);
+			var hiddenDiscount = $('#hiddenDiscount').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			$('.discountVal').text( hiddenDiscount );
+			//할인금액 콤마 넣기
+			$('#hiddenPrice').val(salePrice - discounted);
+			var hiddenPrice = $('#hiddenPrice').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			$('.discountPrice').text( hiddenPrice );
+    	} 
+	});
+   
+    /* form 전송 */ 
+	$('#goodsAddForm').submit(function(event) {
+	});
+	  
+	$('#goodsAddBtn').click(function () {
+		//판매가, 배송비 결과값 콤마 없애기
+		$('.salePrice').val( Number($('.salePrice').val().replace(/,/g, "")) );
+		$('.postPrice').val( Number($('.postPrice').val().replace(/,/g, "")) );
+	 
+		$('#goodsAddForm').submit();
+	});
+	
+	/* 대분류 선택시 중분류 카테고리 나오게 하기 */
+	var largeCategoryList = /*[[${largeCategoryList}]]*/
+		console.log(largeCategoryList)
+	var largeCate = $(".largeCate");
+	var smallCate = $(".smallCate");
+	
+	//대분류 <option> 태그
+	for(var large of largeCategoryList){
+		var largeCode = large.goodsLargeCategory;
+		var largeName = large.goodsCategory;
+		console.log('largeCode: '+large.goodsLargeCategory)
+		console.log('largeName: '+large.goodsCategory)
+		
+		largeCate.append("<option value='"+ largeCode +"'>" + largeName + "</option>");
+	}
+	//대분류 option 클릭 시 중분류 변화
+	$(largeCate).on("change",function(){
+		smallCate.children().remove();
+		smallCate.append("<option value='none'>::</option>")
+			
+		for(var large of largeCategoryList){
+			var selectLarge = $(this).find("option:selected").val();	
+			console.log(selectLarge);
+			
+			for(var small of large.goodsSmallCategoryInfo){
+				var largeCode2 = small.goodsLargeCategory;
+				var smallCode = small.goodsSmallCategory;
+				var smallName = small.smallCategoryName;
 						
-					if(selectLarge === largeCode2){
-						smallCate.append("<option value='"+smallCode+"'>" + smallName + "</option>");
-					}
+				console.log('largeCode2: '+largeCode2);
+				console.log('smallCode: '+smallCode);
+				console.log('smallName: '+smallName);
+					
+				if(selectLarge === largeCode2){
+					smallCate.append("<option value='"+smallCode+"'>" + smallName + "</option>");
 				}
 			}
-		});
-		
-		/* 무료배송 체크박스 체크, 해제 시 이벤트 */
-	    $("#freePost").change(function(){
-	    	if($(this).prop("checked")){
-	    		console.log("무료배송 체크 : Y ");
-	    		$("#goodsPostPrice").attr("disabled", true); //무료배송 체크시 배송비 인풋 막기
-	    		$("#goodsPostPrice").val( 0 );
-	    	}else{
-	    		console.log("무료배송 체크 해제 : N ");
-	    		$("#goodsPostPrice").attr("disabled", false);
-	    	}
-	    });
-		
-	    /* 묶음배송 체크박스 체크, 해제 시 이벤트 */
-	    $("#packagePostCheck").change(function(){
-	        if($(this).is(":checked")){
-	        	console.log("묶음배송 체크 : Y ");
-	        	$("#packagePostCheck").val( 'Y' );
-	        }else{
-	        	console.log("묶음배송 체크 해제 : N ");
-	        	$("#packagePostCheck").val( 'N' );
-	        }
-	    });
-	    
-	    /* 정기배송 체크박스 체크, 해제 시 이벤트 */
-	    $("#regularDeliverCheck").change(function(){
-	        if($(this).is(":checked")){
-	        	console.log("정기배송 체크 : Y ");
-	        	$("#regularDeliverCheck").val( 'Y' );
-	        }else{
-	        	console.log("정기배송 체크 해제 : N ");
-	        	$("#regularDeliverCheck").val( 'N' );
-	        }
-	    });
-		
-		
+		}
 	});
+	
+	/* 무료배송 체크박스 체크, 해제 시 이벤트 */
+    $("#freePost").change(function(){
+    	if($(this).prop("checked")){
+    		console.log("무료배송 체크 : Y ");
+    		$("#goodsPostPrice").attr("disabled", true); //무료배송 체크시 배송비 인풋 막기
+    		$("#goodsPostPrice").val( 0 );
+    	}else{
+    		console.log("무료배송 체크 해제 : N ");
+    		$("#goodsPostPrice").attr("disabled", false);
+    	}
+    });
+	
+    /* 묶음배송 체크박스 체크, 해제 시 이벤트 */
+    $("#packagePostCheck").change(function(){
+        if($(this).is(":checked")){
+        	console.log("묶음배송 체크 : Y ");
+        	$("#packagePostCheck").val( 'Y' );
+        }else{
+        	console.log("묶음배송 체크 해제 : N ");
+        	$("#packagePostCheck").val( 'N' );
+        }
+    });
+    
+    /* 정기배송 체크박스 체크, 해제 시 이벤트 */
+    $("#regularDeliverCheck").change(function(){
+        if($(this).is(":checked")){
+        	console.log("정기배송 체크 : Y ");
+        	$("#regularDeliverCheck").val( 'Y' );
+        }else{
+        	console.log("정기배송 체크 해제 : N ");
+        	$("#regularDeliverCheck").val( 'N' );
+        }
+    });
+
+    /* 이미지 등록 */ 
+	//드래그 앤 드롭
+	$(".sortable").sortable();
+    
+ 	// 파일 현재 필드 숫자 totalCount랑 비교값
+    var fileCount = 0;
+    // 해당 숫자를 수정하여 전체 업로드 갯수를 정한다.
+    var totalCount = 6;
+    
+	//이미지 등록
+	$("#uploadfile").change(function(e){
+    	//div 내용 비워주기
+	    //$('#imgPreview').empty();
+	
+	    var files = e.target.files;
+	    var arr = Array.prototype.slice.call(files);
+	    
+	    // 파일 개수 확인 및 제한
+	    if (fileCount + arr.length > totalCount) {
+			alert('파일은 최대 '+totalCount+'개까지 업로드 할 수 있습니다.');
+			return;
+	    }else{
+	    	fileCount = fileCount + arr.length;
+	    }
+	
+	    //업로드 가능 파일인지 체크
+	    for(var i=0; i<files.length; i++){
+	        if(!checkExtension(files[i].name,files[i].size)){
+	            return false;
+	    	}
+		}
+    	preview(arr);
+
+	    function checkExtension(fileName,fileSize){
+	        var regex = new RegExp("(.*?)\.(exe|sh|zip|alz)$");
+	        var maxSize = 20971520;  //20MB
+	
+	        if(fileSize >= maxSize){
+	            alert('이미지 크기가 초과되었습니다.');
+	            $("#uploadfile").val("");  //파일 초기화
+	            return false;
+	        }
+	        if(regex.test(fileName)){
+	            alert('확장자명을 확인해주세요.');
+	            $("#uploadfile").val("");  //파일 초기화
+	            return false;
+	        }
+	        return true;
+	    }
+
+		function preview(arr){
+			arr.forEach(function(f){
+	            /* 파일명이 길면 파일명...으로 처리
+	            var fileName = f.name;
+	            if(fileName.length > 10){
+	                fileName = fileName.substring(0,7)+"...";
+	            } */
+	            
+	            //div에 이미지 추가
+	            var str = '<li class="ui-state-default">';
+	            //str += '<span>'+fileName+'</span><br>';
+	            //이미지 파일 미리보기
+	            if(f.type.match('image.*')){
+	                //파일을 읽기 위한 FileReader객체 생성
+	                var reader = new FileReader(); 
+	                reader.onload = function (e) { 
+	                    //파일 읽어들이기를 성공했을때 호출되는 이벤트 핸들러
+	                    str += '<img src="'+e.target.result+'" title="'+f.name+'" multiple="multiple" width=100 height=100>';
+	                    str += '<span class="delBtn" onclick="delImg(this)">x</span>';
+	                    str += '</li>';
+	                    $(str).appendTo('#imgPreview');
+	                } 
+	                reader.readAsDataURL(f);
+	            }else{
+	                //이미지 파일 아닐 경우 대체 이미지
+	                str += '<img src="/resources/img/fileImg.png" title="'+f.name+'" width=100 height=100 />';
+	                $(str).appendTo('#imgPreview');
+	            }
+	    	})
+		}
+
+	});
+});
+
+//미리보기 사진 삭제
+function delImg(_this){
+	$(_this).parent('li').remove()
+}	            
 </script>
 </th:block>
 </html>

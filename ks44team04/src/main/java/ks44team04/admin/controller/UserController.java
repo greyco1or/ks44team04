@@ -9,10 +9,14 @@ import ks44team04.dto.Leave;
 import ks44team04.dto.LevelBuyerCategory;
 import ks44team04.dto.LevelSellerCategory;
 import ks44team04.dto.Login;
+import ks44team04.dto.PaymentTotal;
 import ks44team04.dto.Right;
+import ks44team04.dto.Search;
 import ks44team04.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +27,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
@@ -33,19 +40,113 @@ import javax.servlet.http.HttpSession;
 public class UserController {
 
     private UserService userService;
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    
+	private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
+    
+    // 10/19 회원 검색
+    @GetMapping("/user/userList2")
+    public String searchUserList(Search search, Model model) {
+    	
+    	log.info(">>>>{}",search);
+    	
+    	List<User> userList = userService.searchUserList(search);
+    	model.addAttribute("title", "검색결과");
+    	model.addAttribute("userList", userList);
+    	log.info("회원 검색결과 :::::::::: {}", userList);
+    	
+    	
+    	return "admin/user/userList";
+    }
+    
+	// 10/17 판매자 검색
+	@GetMapping("/user/sellerList2")
+	public String searchSellerList(@RequestParam(name="searchKey") String sk
+								   ,@RequestParam(name="searchValue") String sv
+								   ,@RequestParam(name="fromDate", required = false, defaultValue= "") String fromDate
+								   ,@RequestParam(name="toDate", required = false, defaultValue= "") String toDate
+								   ,Model model) {
+		
+		if(sk.equals("sellerId")) {
+			sk = "s.seller_id";
+		}else if(sk.equals("sellerCode")) {
+			sk = "s.seller_code";
+		}else if(sk.equals("sellerSort")) {
+			sk = "s.seller_sort";
+		}else if(sk.equals("storeName")) {
+			sk = "s.store_name";
+		}else if(sk.equals("storePhone")) {
+			sk = "s.store_phone";
+		}
+		
+		Map<String, Object> searchMap = new HashMap<String, Object>();
+		searchMap.put("sk", sk);
+		searchMap.put("sv", sv);
+		searchMap.put("fd", fromDate);
+		searchMap.put("td", toDate);
+		
+		List<Seller> sellerList = userService.searchSellerList(searchMap);
+		model.addAttribute("title", "검색결과");
+		model.addAttribute("sellerListY", sellerList);
+		model.addAttribute("searchKey", sk);
+		model.addAttribute("searchValue", sv);
+		log.info("회원 검색결과 :::::::::: {}", sellerList);
+		
+		return "admin/user/sellerList";
+	}
+    
+    // 10/17 (휴면목록) 1 휴면해제 클릭시 회원상태 '정상' / 2 휴면해제 클릭시 휴면 테이블 '휴면해제'
+    @GetMapping("/user/dormantToNormal")
+    public String dormantToNormal(@RequestParam(value="userId", required = false) String userId) {
+    	log.info("휴면전환 될 회원 아이디:::::::::: {}", userId);
+    	userService.dormantToNormal1(userId);
+    	userService.dormantToNormal2(userId);
+    	
+    	return "redirect:/admin/user/dormantList";
+    }
+	
+    // 10/13 회원 탈퇴
+	@GetMapping("/user/removeUser")
+	public String removeUser(@RequestParam(value = "userId") String userId) {
+		
+		User userInfo = userService.getUserInfoById(userId);
+		String userRight = userInfo.getUserRight();
+		String userInfoKeep = userInfo.getUserInfoKeep();
+		
+		if(userInfo != null) {
+			int resultRemove = userService.removeUser(userId, userRight, userInfoKeep);
+			if(resultRemove > 0) return "redirect:/admin/user/userList";
+		}
+		
+		return "redirect:/admin/user/userList";
+	}
+	
+	//관리자 비밀번호 체크
+	@PostMapping("/user/pwCheck")
+	@ResponseBody
+	public int pwCheck(@RequestParam(value = "userPw") String userPw) {
+		
+		//String userId = "admin01";
+		String adminPw = userService.getAdminPw(userPw);
+		log.info("관리자 비밀번호 ::: {}", adminPw);
+		
+		if(userPw.equals(adminPw)) {
+		return 1;
+		}
+		return 0;
+	}
 	
 	// 10/11 판매자 신청 승인
 	@PostMapping("/user/approveSeller")
 	public String approveSeller(@RequestParam(value="sellerId", required = false) String sellerId
-								,Seller seller, User user, Model model) {
+							    ,@RequestParam(value="approveId", required = false) String approveId) {
 		
-		userService.approveSeller(seller);
-		userService.approveSellerRight(user);
+		userService.approveSeller(sellerId, approveId);
+		userService.approveSellerRight(sellerId);
 		
 		return "redirect:/admin/user/sellerList";
 	}
@@ -154,7 +255,7 @@ public class UserController {
 		return cnt;
 	}
 	
-	//구매자 회원가입
+	//구매자 회원가입 쿼리실행
 	@PostMapping("/user/addUser")
     public String addUser(User user) {
 		log.info("사용자가 입력한 회원의 정보 ::: {}", user);
@@ -164,7 +265,7 @@ public class UserController {
         return "redirect:/admin/user/userList";
     }
 	
-	//구매자 회원가입 쿼리 실행
+	//구매자 회원가입 화면
 	@GetMapping("/user/addUser")
 	public String addUserForm(Model model) {
 		List<LevelBuyerCategory> levelBuyer = userService.getLevelBuyer();
@@ -179,7 +280,32 @@ public class UserController {
 		return "admin/user/addUser";
 	}
 	
-	//회원 수정
+	//판매자 정보 수정
+	@PostMapping("/user/modifySeller")
+	public String modifySeller(Seller seller) {
+		
+		log.info("판매자 정보 수정 정보 ::: {}", seller);
+		userService.modifySeller(seller);
+		
+		return "redirect:/admin/user/sellerList";
+	}
+	
+	//판매자 정보 수정(저장된 정보 가져오기)
+	@GetMapping("/user/modifySeller")
+	public String modifySeller(@RequestParam(value="sellerId", required = false) String sellerId
+							  ,Model model) {
+		Seller sellerInfo = userService.getSellerInfoById(sellerId);
+		log.info("판매자 정보 ::: {}",sellerInfo);
+		List<GoodsLargeCategory> goodsLargeCategory = userService.getGoodsLargeCategory();
+		
+		model.addAttribute("title", "판매자정보수정");
+		model.addAttribute("sellerInfo", sellerInfo);
+		model.addAttribute("goodsLargeCategory", goodsLargeCategory);
+		
+		return "admin/user/modifySeller";
+	}
+	
+	//회원 정보 수정
 	@PostMapping("/user/modifyUser")
 	public String modifyUser(User user) {
 		
@@ -189,18 +315,20 @@ public class UserController {
 		return "redirect:/admin/user/userList";
 	}
 	
-	//회원수정(저장된 정보 가져오기)
+	//회원 정보 수정(저장된 정보 가져오기)
 	@GetMapping("/user/modifyUser")
 	public String modifyUser(@RequestParam(value="userId", required = false) String userId
 							  ,Model model) {
         User userInfo = userService.getUserInfoById(userId);
         log.info("회원정보 ::: {}",userInfo);
         List<LevelBuyerCategory> levelBuyer = userService.getLevelBuyer();
+        List<LevelSellerCategory> levelSeller = userService.getLevelSeller();
         List<Right> rightList = userService.getRightList();
         
 		model.addAttribute("title", "회원정보수정");
 		model.addAttribute("userInfo", userInfo);
 		model.addAttribute("levelBuyer", levelBuyer);
+		model.addAttribute("levelSeller", levelSeller);
 		model.addAttribute("rightList", rightList);
 		
 		return "admin/user/modifyUser";
@@ -229,8 +357,8 @@ public class UserController {
 	@GetMapping("/user/userDetail")
 	public String userDetail(@RequestParam(value="userId", required = false) String userId
 							  ,String sellerId ,Model model) {
+		
         User userInfo = userService.getUserInfoById(userId);
-        
         String userLevel = userInfo.getUserLevel();
         LevelBuyerCategory levelBuyer = userInfo.getLevelBuyer();
         LevelSellerCategory levelSeller = userInfo.getLevelSeller();
@@ -254,7 +382,7 @@ public class UserController {
 		return "admin/user/userDetail";
 	}
 	
-	//로그 목록
+	/* 로그인 목록 */
 	@GetMapping("/user/loginList")
 	public String getLoginList(Model model) {
 		List<Login> loginList = userService.getLoginList();
@@ -265,6 +393,7 @@ public class UserController {
 		return "admin/user/loginList";
 	}
 	
+	/* 탈퇴회원 목록 */
 	@GetMapping("/user/leaveList")
 	public String getLeaveList(Model model) {
 		List<Leave> leaveList = userService.getLeaveList();
@@ -275,20 +404,21 @@ public class UserController {
 		return "admin/user/leaveList";
 	}
 	
+	/* 휴면회원 목록 */
 	@GetMapping("/user/dormantList")
 	public String getDormantList(Model model) {
 		List<Dormant> dormantList = userService.getDormantList();
 		log.info("휴면회원 목록 ::: {}", dormantList);
-		model.addAttribute("sellerList", dormantList);
+		model.addAttribute("dormantList", dormantList);
 		model.addAttribute("title", "휴면회원목록");
 		
 		return "admin/user/dormantList";
 	}
 	
-	//판매자리스트
+	/* 판매자 목록 */
 	@GetMapping("/user/sellerList")
 	public String getSellerList(Model model) {
-		List<Seller> sellerList = userService.getSellerList();
+		List<Seller> sellerList = userService.searchSellerList(null);
 		log.info("판매자 목록 ::: {}", sellerList);
 		List<Seller> sellerListY = sellerList.stream()
 											 .filter(t -> StringUtils.equals("Y", t.getApproveCheck()))

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/userDefault}">
+      
+<th:block layout:fragment="customCss">
+<!-- 폰트 -->
+<link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
+<style>
+* { font-family: 'Spoqa Han Sans Neo', 'sans-serif'; color: #333;}
+.table {
+	width:800px;
+	margin-right:auto;
+	margin-left:auto;
+	border-top:2px solid #82ae4691;
+}
+.table tbody tr td {
+	padding: 7px 7px;
+}
+.boardAdd { 
+	margin-right: 55px;
+ 	right: 0px;
+ 	padding: 0px 10px;
+	position:absolute;
+	width: 110px;
+	height: 40px;
+	font-size: 15px;
+	background-color: #dbe6c4;
+	border:none;
+	border-radius:28px;
+}
+.boardAdd:focus{ 	
+    border: none;
+    outline:none;
+    }
+
+</style>
+</th:block>
+
+<th:block layout:fragment="customContents">
+<section class="ftco-section" style="padding:2em 0;">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="text-center" style="height:100px;">
+				<div style="font-size:25px;"></div>
+            </div>
+        </div>
+        
+        
+        <!-- 테이블 시작 -->
+        <table class="table" th:object="${boardInfo}">
+			<thead>
+				<tr>
+					<th colspan="7" th:text="*{boardTitle}" style="font-size:17px; text-align:left;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="d-flex">
+					<td class="col-md-5"></td>
+					<td class="col-md-1">작성일</td>
+					<td class="col-md-2" th:text="*{#strings.substring(regDate,0,10)}"></td>
+					<td class="col-md-1">조회수</td>
+					<td class="col-md-1" th:text="*{viewAmount}"></td>
+					<td class="col-md-1">좋아요</td>
+					<td class="col-md-1" th:text="*{likeAmount}"></td>
+				</tr>
+				<tr style="height:400px;">
+					<td class="d-flex" colspan="7" style="border-bottom:1px solid #dee2e6 !important;">
+						<div th:utext="*{boardContent}" style="height:400px; text-align:left;"></div>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td style="text-align:left; font-size:18px;">댓글</td>
+				</tr>
+			</tfoot>
+		</table>
+		<div style="position: relative; width: 100%; height: 40px; display: flex; margin-top:10px;">
+			<button type="button" class="boardAdd">목록</button>
+		</div>
+		<hr style="margin-top:50px;">
+		
+	</div> 
+</section>
+</th:block>
+<th:block layout:fragment="customJsScript">
+<th:block th:replace="fragments/userJs :: datatablesFragment"></th:block>
+<script th:inline="javascript">
+//<a th:href="@{/user/board/boardAdd}">
+    $('.boardAdd').on('click', function(){
+    	if([[${session.SID}]] == null){
+    		alert('로그인 후 이용가능합니다.');
+    		location.href='/user/user/login';
+    	}else{
+    		location.href='/user/board/boardAdd';
+    	}
+    });
+</script>
+</th:block>
+</html>

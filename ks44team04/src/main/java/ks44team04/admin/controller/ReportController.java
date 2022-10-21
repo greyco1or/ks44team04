@@ -1,7 +1,9 @@
 package ks44team04.admin.controller;
 
+import ks44team04.service.GoodsService;
 import ks44team04.service.ReportService;
 import ks44team04.util.CodeIndex;
+import ks44team04.dto.Goods;
 import ks44team04.dto.Report;
 import ks44team04.dto.ReportRule;
 import ks44team04.dto.User;
@@ -9,6 +11,7 @@ import ks44team04.dto.UserSuspend;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,15 +23,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 @Controller
 @RequestMapping("/admin")
 public class ReportController {
 
 	private ReportService reportService;
+	private GoodsService goodsService;
+	
 	private static final Logger log = LoggerFactory.getLogger(ReportController.class);
 
-	public ReportController(ReportService reportService) {
+	public ReportController(ReportService reportService,GoodsService goodsService) {
 		this.reportService = reportService;
+		this.goodsService = goodsService;
 	}
 	
 	/*
@@ -65,7 +72,7 @@ public class ReportController {
             reportHistoryCode, Report report, Model model) {
 		
 		//특정 신고목록
-		Report Report = reportService.getReportHostryCode(reportHistoryCode);
+		Report Report = reportService.getReportHistoryCode(reportHistoryCode);
 		model.addAttribute("titel", "신고상세수정");
 		model.addAttribute("Report", Report);
 		
@@ -97,7 +104,7 @@ public class ReportController {
             reportHistoryCode, Report report ,Model model) {
 		
 		//특정 신고목록
-		Report Report = reportService.getReportHostryCode(reportHistoryCode);
+		Report Report = reportService.getReportHistoryCode(reportHistoryCode);
 		
 		model.addAttribute("titel", "신고처리");
 		model.addAttribute("Report", Report);
@@ -123,10 +130,31 @@ public class ReportController {
 		return "redirect:/admin/report/reportList";
 	}
 	
+	// 상품에서 신고등록
+	@GetMapping("/report/userReport")
+	public String getUserReport(@RequestParam(value = "goodsList" , required = false) String goodsList, Report report ,Model model) {
+
+		String repoterId = "buyer01";
+		String HistoryCode = reportService.getHistoryCode();
+		HistoryCode = CodeIndex.codeIndex(HistoryCode, 15);
+		log.info("---------------------------------사용자가 입력한 정보", report);
+		report.setReportHistoryCode(HistoryCode);
+		report.setReportingId(repoterId);
+		reportService.setReport(report);
+		log.info("---------------------------------, {}", HistoryCode);
+		Goods goodsInfo = goodsService.getGoodsInfoByCode(goodsList);
+		/* model.addAttribute("title", "신고하기"); */
+		/* model.addAttribute("reportList", reportList); */
+		model.addAttribute("goodsInfo", goodsInfo);
+		return "/user/goods/goods";
+	}
+	
 	//신고 리스트 검색 
 	@PostMapping("/report/reportList")
 	public String getReportSearch(@RequestParam(name="reportSearchKey")String sk 
 								 ,@RequestParam(name="reportSearchValue")String sv
+								 ,@RequestParam(name="fromDate", required = false, defaultValue="") String fromDate
+								 ,@RequestParam(name="toDate", required = false, defaultValue= "") String toDate
 								 , Model model) {
 		if("reportHistoryCode".equals(sk)) {
 			sk= "report_history_code";
@@ -143,6 +171,8 @@ public class ReportController {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("sk", sk);
 		paramMap.put("sv", sv);
+		paramMap.put("fd", fromDate);
+		paramMap.put("td", toDate);
 		
 		List<Report> reportList = reportService.getReportSearch(paramMap);
 	
@@ -151,6 +181,8 @@ public class ReportController {
 		
 		return "admin/report/reportList";
 	}
+	
+
 	
 	// 신고리스트
 	@GetMapping("/report/reportList")
@@ -164,11 +196,32 @@ public class ReportController {
 		return "admin/report/reportList";
 	}
 	
+	//정지 등록 (관리자)
+	@PostMapping("/report/suspandAdd")
+	public String suspendAdd(UserSuspend userSuspend, User user) {
+		
+		String getUserSuspendCods = reportService.getUserSuspendCode();
+		getUserSuspendCods = CodeIndex.codeIndex(getUserSuspendCods, 13);
+		
+		userSuspend.setUserSuspendCode(getUserSuspendCods);
+		reportService.suspendAdd(userSuspend);
+		
+		//정지 일수 업데이트
+		reportService.suspendDayUp(userSuspend);
+		
+		//정지 유저 상태 업데이트
+		reportService.reportUserUp(user);
+		return "redirect:/admin/report/userSuspendList";
+	}
+	
 	//정지 리스트 검색 
 	@PostMapping("/report/userSuspendList")
 	public String getSuspendSearch(@RequestParam(name="reportSearchKey")String sk 
-								 ,@RequestParam(name="reportSearchValue")String sv
-								 , Model model) {
+								  ,@RequestParam(name="reportSearchValue", required = false, defaultValue="")String sv
+								  ,@RequestParam(name="SearchKey", required = false, defaultValue="")String dk
+								  ,@RequestParam(name="fromDate", required = false, defaultValue="") String fromDate
+								  ,@RequestParam(name="toDate", required = false, defaultValue= "") String toDate
+								  ,Model model) {
 		if("userSuspendCode".equals(sk)) {
 			sk= "user_suspend_code";
 		}else if("suspendId".equals(sk)) {
@@ -179,9 +232,21 @@ public class ReportController {
 			sk= "suspend_result";
 		}
 		
+		
+		if("startSuspend".equals(dk)) {
+			dk= "start_suspend";
+		}else if("endSuspend".equals(dk)) {
+			dk= "end_suspend";
+		}
+		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("sk", sk);
 		paramMap.put("sv", sv);
+		paramMap.put("dk", dk);
+		paramMap.put("fd", fromDate);
+		paramMap.put("td", toDate);
+		
+		System.out.println(paramMap);
 		
 		List<UserSuspend> userSuspendList = reportService.getSuspendSearch(paramMap);
 	
@@ -209,8 +274,29 @@ public class ReportController {
 		return "admin/report/userSuspendList";
 	}
 	
+	//특정 정지 목록
+	@GetMapping("/report/userSuspendListUp")
+	public String suspendListUp(@RequestParam(value = "userSuspendCode" , required = false) String userSuspendCode, Model model) {
+		
+		UserSuspend userSuspend = reportService.SuspendUpList(userSuspendCode);
+		log.info("::::::::::::::::{}" , userSuspendCode);
+		model.addAttribute("title", "특정 정지 목록");
+		model.addAttribute("userSuspend", userSuspend);
+
+		
+		return "admin/report/userSuspendListUp";
+	}
 	
+	//특정 정지 목록 수정
+	@PostMapping("/report/userSuspendListUp")
+	public String suspendUp(UserSuspend userSuspend) {
+		
+		reportService.suspendListUp(userSuspend);
+		
+		return "redirect:/admin/report/userSuspendList";
+	}
 	
+	// 벌점 기준 목록
 	@GetMapping("/report/reportRuleList")
 	public String reportRuleList(Model model) {
 		
@@ -220,4 +306,85 @@ public class ReportController {
 		
 		return "admin/report/reportRuleList";
 	}
+	
+	//벌점 기준 목록 검색
+	@PostMapping("/report/reportRuleList")
+	public String ruleListSaerch(@RequestParam(name="reportSearchKey")String sk 
+								 ,@RequestParam(name="reportSearchValue", required = false, defaultValue="")String sv
+								 ,@RequestParam(name="fromDate", required = false, defaultValue="") String fromDate
+								 ,@RequestParam(name="toDate", required = false, defaultValue= "") String toDate
+								 ,Model model){
+		
+		if("reportCode".equals(sk)) {
+			sk= "report_code";
+		}else if("reportReason".equals(sk)) {
+			sk= "report_reason";
+		}else if("userId".equals(sk)) {
+			sk= "user_id";
+		}else if("penaltyPoint".equals(sk)) {
+			sk= "penalty_point";
+		}
+		
+		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("sk", sk);
+		paramMap.put("sv", sv);
+		paramMap.put("fd", fromDate);
+		paramMap.put("td", toDate);
+		
+		System.out.println(paramMap);
+		
+		List<ReportRule> reportRuleList = reportService.ruleListSaerch(paramMap);
+	
+		model.addAttribute("title", "벌점 기준 목록 검색");
+		model.addAttribute("reportRuleList", reportRuleList);
+		
+		return "admin/report/reportRuleList";
+	}
+	
+	//벌점 기준 목록 등록 
+	@GetMapping("/report/reportRuleAdd")
+	public String reportRuleAdd(ReportRule reportRule) {
+		
+			String reportRuleCode = reportService.reportRuleCode();
+			reportRuleCode = CodeIndex.codeIndex(reportRuleCode, 14);
+			
+			reportRule.setReportCode(reportRuleCode);
+			reportService.reportRuleAdd(reportRule);
+			
+		return "redirect:/admin/report/reportRuleList";
+	}
+	
+	//벌점 기준 목록 삭제
+	@GetMapping("/report/reportRuleDelete")
+	public String reportRuleDelete(ReportRule reportRule) {
+		
+		reportService.reportRuleDelete(reportRule);
+		
+		return "redirect:/admin/report/reportRuleList";
+	}
+	
+	//벌점 기준 특정 목록 조회 
+	@GetMapping("/report/ruleUpList")
+	public String reportRuleUpList(@RequestParam(value = "reportCode" , required = false) String
+			reportCode, Model model ) {
+		
+		ReportRule reportRule = reportService.reportRuleUpList(reportCode);
+		log.info("::::::::::::::::{}" , reportCode);
+		model.addAttribute("title", "특정 벌점 기준 목록");
+		model.addAttribute("reportRule", reportRule);
+
+		
+		return "admin/report/ruleUpList";
+	}
+	
+	//벌점 기준목록 수정 
+	@PostMapping("/report/ruleUp")
+	public String ruleUp(ReportRule reportRule) {
+		
+		reportService.reportRuleUp(reportRule);
+		
+		return "redirect:/admin/report/reportRuleList";
+	}
+	
 }

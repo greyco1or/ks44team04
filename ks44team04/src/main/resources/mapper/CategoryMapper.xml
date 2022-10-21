@@ -4,7 +4,504 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
         
 <mapper namespace="ks44team04.mapper.CategoryMapper">
+	<!-- ==============================구매자 등급 카테고리============================== -->
+	
+    <!-- 구매자 등급 카테고리 목록 -->
+	<resultMap  type="LevelBuyerCategory"	id="levelBuyerCategoryListMap">
+		<id	    column="level_code"			property="levelCode"/> 		    <!-- 등급 코드 PK -->
+        <result column="level_name"         property="levelName"/>		    <!-- 등급 이름 -->
+        <result column="reg_id" 			property="regId"/>		        <!-- 회원 아이디 FK(등록인) -->
+        <result column="level_reg_date" 	property="levelRegDate"/>		<!-- 등급 생성일 -->
+        <result column="use_check" 			property="useCheck"/>			<!-- 사용 여부 -->
+        <result column="buyer_price_terms"	property="buyerPriceTerms"/>	<!-- 구매자 구매 금액 조건 (6개월) -->
+        <result column="save_rate" 		    property="saveRate"/>			<!-- 적립율(%) -->
+        <result column="level_code_npk" 	property="levelCodeNpk"/>		<!-- 등급 코드 -->
+	</resultMap>
     
+    <!-- 구매자 등급 카테고리 목록 조희 -->
+    <select id="getLevelBuyerCategoryList" resultMap="levelBuyerCategoryListMap">
+    	 /* 구매자 등급 카테고리 목록 조희 */
+		 SELECT 
+			 level_code				 -- 등급 코드 PK
+			,level_name 			 -- 등급 이름
+			,reg_id 				 -- 회원 아이디 FK(등록인)
+			,level_reg_date			 -- 등급 생성일
+			,use_check				 -- 사용 여부
+			,buyer_price_terms       -- 구매자 구매 금액 조건 (6개월)
+			,save_rate		         -- 적립율(%)
+			,level_code_npk	   		 -- 등급 코드
+		FROM 
+			tb_level_buyer_category; -- 구매자 등급 카테고리 테이블
+    </select>
+    
+    <!-- 특정 구매자 등급 카테고리 조희 -->
+    <select id="getLevelBuyerCategoryByPK" parameterType="String" resultType="LevelBuyerCategory">
+    	 /* 특정 구매자 등급 카테고리 조희 */
+		 SELECT 
+			 level_code		   AS levelCode		  -- 등급 코드 PK
+			,level_name        AS levelName		  -- 등급 이름
+			,reg_id			   AS regId		      -- 회원 아이디 FK(등록인)
+			,level_reg_date	   AS levelRegDate	  -- 등급 생성일
+			,use_check		   AS useCheck		  -- 사용 여부
+			,buyer_price_terms AS buyerPriceTerms -- 구매자 구매 금액 조건 (6개월)
+			,save_rate		   AS saveRate     	  -- 적립율(%)
+			,level_code_npk	   AS levelCodeNpk	  -- 등급 코드
+		FROM 
+			tb_level_buyer_category  	 		  -- 구매자 등급 카테고리 테이블
+		WHERE level_code = #{levelCode};          -- 특정 구매자 등급 카테고리의 등급 코드
+    </select>
+    
+    <!-- 구매자 등급 카테고리 수청 처리  -->
+    <update id="modifyLevelBuyerCategory" parameterType="LevelBuyerCategory">
+    	/* 구매자 등급 카테고리 수청 처리 */
+    	UPDATE tb_level_buyer_category 									  -- 구매자 등급 카테고리 테이블
+     	<trim prefix="SET" prefixOverrides=",">
+			<if test="levelName != null and levelName != ''">             -- 등급 이름
+				level_name = #{levelName}
+			</if>
+			<if test="useCheck != null and useCheck != ''"> 			  -- 사용 여부
+				,use_check = #{useCheck}
+			</if>
+			<if test="buyerPriceTerms != null and buyerPriceTerms != ''"> -- 구매자 구매 금액 조건 (6개월)
+				,buyer_price_terms = #{buyerPriceTerms}
+			</if>
+			<if test="saveRate != null and saveRate != ''"> 			  -- 적립율(%)
+				,save_rate = #{saveRate}
+			</if>
+			<if test="levelCodeNpk != null and levelCodeNpk != ''"> 	  -- 등급 코드
+				,level_code_npk = #{levelCodeNpk}
+			</if>
+		</trim>
+			WHERE 
+				level_code = #{levelCode};								  -- 특정 구매자 등급 카테고리의 등급 코드
+     </update>
+    
+    <!-- 구매자 등급 카테고리 등록 처리  -->
+    <insert id="addLevelBuyerCategory" parameterType="LevelBuyerCategory">
+    	/* 구매자 등급 카테고리 등록 처리 */
+		INSERT INTO tb_level_buyer_category -- 구매자 등급 카테고리 테이블
+			(level_code						-- 등급 코드 PK
+			,level_name						-- 등급 이름
+			,reg_id							-- 회원 아이디 FK(등록인)
+			,level_reg_date					-- 등급 생성일
+			,use_check						-- 사용 여부
+			,buyer_price_terms				-- 구매자 구매 금액 조건 (6개월)
+			,save_rate						-- 적립율(%) 
+			,level_code_npk)				-- 등급 코드
+		VALUES 
+			(#{levelCode}					-- 등급 코드 PK
+			,#{levelName}					-- 등급 이름
+			,'admin01'						-- 회원 아이디 FK(등록인)
+			,NOW()							-- 등급 생성일
+			,#{useCheck} 					-- 사용 여부
+			,#{buyerPriceTerms} 			-- 구매자 구매 금액 조건 (6개월)
+			,#{saveRate}					-- 적립율(%)
+			,#{levelCode});					-- 등급 코드
+    </insert>    
+    
+    <!-- 마지막 인덱스에 저장되어 있는 PK값을 조회 -->
+    <select id="getLastIndexOfLevelBuyerCategoryPK" resultType="String">
+    	/* 마지막 인덱스에 저장되어 있는 PK값을 조회 */
+		SELECT
+			MAX(level_code) 		-- 마지막 인덱스에 저장되어 있는 PK값
+		FROM 
+			tb_level_buyer_category -- 구매자 등급 카테고리 테이블   	
+    </select>
+    
+    <!-- 구매자 등급 카테고리 삭제 처리 -->
+ 	<delete id="removeLevelBuyerCategory" parameterType="String">
+  		/* 자주 묻는 질문 삭제 */
+		DELETE FROM
+			tb_level_buyer_category    -- 구매자 등급 카테고리 테이블
+		WHERE 
+			level_code = #{levelCode}; -- 구매자 등급 카테고리의 등급 코드 
+ 	</delete>
+ 	
+ 	<!-- 구매자 등급 카테고리 검색 처리 -->
+ 	<!-- 100까지만 검색이 가능하다. -->
+    <select id="searchLevelBuyerCategory" parameterType="Map" resultMap="levelBuyerCategoryListMap" fetchSize="100">
+    	/* 구매자 등급 카테고리 검색 처리 */
+		SELECT 
+			 level_code				 		-- 등급 코드 PK
+			,level_name 					-- 등급 이름
+			,reg_id 				 		-- 회원 아이디 FK(등록인)
+			,level_reg_date			 		-- 등급 생성일
+			,use_check				 		-- 사용 여부
+			,buyer_price_terms       		-- 구매자 구매 금액 조건 (6개월)
+			,save_rate		         		-- 적립율(%)
+			,level_code_npk	   		 		-- 등급 코드
+	    FROM 
+			tb_level_buyer_category 		-- 구매자 등급 카테고리 테이블
+		<if test="sK != null and sV != ''"> -- 검색 키가 있고, 검색 값이 공백이 아니다.
+			<trim prefix="WHERE" prefixOverrides="AND | OR">					  -- WHERE 필터
+				<if test="sK != null and sV != '' and sK == 'level_name'"> 		  -- 검색 키가 등급 이름이다.
+					${sK} LIKE CONCAT('%', #{sV}, '%')
+				</if>
+				/* 제목 */ 
+				<if test="sK != null and sV != '' and sK == 'use_check'"> 		  -- 검색 키가 사용 여부이다.
+					${sK} = #{sV}
+				</if>
+				/* 내용 검색 */ 
+				<if test="sK != null and sV != '' and sK == 'buyer_price_terms'"> -- 검색 키가 구매자 구매 금액 조건 (6개월)이다.
+					${sK} = #{sV}
+				</if>
+				/* 사용 여부 검색 */ 
+				<if test="sK != null and sV != '' and sK == 'save_rate'"> 		  -- 검색 키가 적립율(%)이다.
+					${sK} = #{sV}
+				</if>
+			</trim>
+		</if>
+		ORDER BY level_code ASC;											  	  -- 자주 묻는 질문 PK를 내림차순으로 정렬한다.
+    </select>
+    
+	<!-- ==============================구매자 등급 카테고리============================== -->
+	
+	<!-- ==============================판매자 등급 카테고리============================== -->
+	
+    <!-- 판매자 등급 카테고리 목록 -->
+	<resultMap  type="LevelSellerCategory"		id="levelSellerCategoryListMap">
+		<id	    column="level_code"				property="levelCode"/> 		    <!-- 등급 코드 PK -->
+        <result column="level_name"         	property="levelName"/>		    <!-- 등급 이름 -->
+        <result column="reg_id" 				property="regId"/>		        <!-- 회원 아이디 FK(등록인) -->
+        <result column="level_reg_date" 		property="levelRegDate"/>		<!-- 등급 생성일 -->
+        <result column="use_check" 				property="useCheck"/>			<!-- 사용 여부 -->
+        <result column="seller_price_terms"		property="sellerPriceTerms"/>	<!-- 1년 누적 판매 금액 -->
+        <result column="seller_score_terms"		property="sellerScoreTerms"/>	<!-- 1년 누적 판매 건수 -->
+        <result column="seller_review_terms"	property="sellerReviewTerms"/>	<!-- 6개월 평균 리뷰 평점 -->
+        <result column="level_code_npk" 		property="levelCodeNpk"/>		<!-- 등급 코드 -->
+	</resultMap>
+    
+    <!-- 판매자 등급 카테고리 목록 조희 -->
+    <select id="getLevelSellerCategoryList" resultMap="levelSellerCategoryListMap">
+   		/* 판매자 등급 카테고리 목록 조희 */
+		SELECT 
+			 level_code				  -- 등급 코드 PK
+			,level_name		     	  -- 등급 이름
+			,reg_id					  -- 회원 아이디 FK(등록인)
+			,level_reg_date			  -- 등급 생성일
+			,use_check				  -- 사용 여부
+			,seller_price_terms		  -- 1년 누적 판매 금액
+			,seller_score_terms		  -- 1년 누적 판매 건수
+			,seller_review_terms	  -- 6개월 평균 리뷰 평점
+			,level_code_npk			  -- 등급 코드
+		FROM 
+			tb_level_seller_category; -- 판매자 등급 카테고리 테이블     	
+    </select>
+    
+    <!-- 특정 판매자 등급 카테고리 조희 -->
+    <select id="getLevelSellerCategoryByPK" parameterType="String" resultType="LevelSellerCategory">
+   		/* 특정 판매자 등급 카테고리 조희 */
+		SELECT 
+			 level_code			 AS	levelCode	      -- 등급 코드 PK
+			,level_name		 	 AS levelName   	  -- 등급 이름
+			,reg_id				 AS	regId  			  -- 회원 아이디 FK(등록인)
+			,level_reg_date		 AS	levelRegDate	  -- 등급 생성일
+			,use_check			 AS	useCheck	      -- 사용 여부
+			,seller_price_terms	 AS sellerPriceTerms  -- 1년 누적 판매 금액
+			,seller_score_terms  AS	sellerScoreTerms  -- 1년 누적 판매 건수
+			,seller_review_terms AS sellerReviewTerms -- 6개월 평균 리뷰 평점
+			,level_code_npk 	 AS	levelCodeNpk	  -- 등급 코드
+		FROM 
+			tb_level_seller_category 				  -- 판매자 등급 카테고리 테이블     	
+		WHERE level_code = #{levelCode};              -- 특정 판매자 등급 카테고리의 등급 코드			
+    </select>
+	
+	<!-- ==============================판매자 등급 카테고리============================== -->
+	
+	<!-- ==============================고객 문의 카테고리============================== -->
+	
+    <!-- 고객 문의 카테고리 목록 -->
+	<resultMap  type="CustomerAskCategory"	id="customerAskCategoryListMap">
+		<id	    column="ask_category"		property="askCategory"/> 	<!-- 문의 카테고리 PK -->
+        <result column="reg_id" 			property="regId"/>		    <!-- 회원 아이디 FK(등록인) -->
+        <result column="category_name"		property="categoryName"/>	<!-- 카테고리명 -->
+        <result column="reg_date" 			property="regDate"/>		<!-- 등록일 -->
+        <result column="use_check" 			property="useCheck"/>		<!-- 사용 여부 -->
+	</resultMap>
+    
+    <!-- 고객 문의 카테고리 목록 조희 -->
+    <select id="getCustomerAskCategoryList" resultMap="customerAskCategoryListMap">
+    	/* 고객 문의 카테고리 목록	조회 */
+		SELECT 
+			 ask_category  			  -- 문의 카테고리 PK
+			,reg_id					  -- 회원 아이디 FK(등록인)
+			,category_name			  -- 카테고리명
+			,reg_date				  -- 등록일
+			,use_check				  -- 사용 여부
+		FROM 
+			tb_customer_ask_category; -- 고객 문의 카테고리 테이블     	 					
+    </select>	
+    
+    <!-- 특정 고객 문의 카테고리 조희 -->
+    <select id="getCustomerAskCategoryByPK" parameterType="String" resultType="CustomerAskCategory">
+    	/* 고객 문의 카테고리 목록 조희 */
+		SELECT 
+			 ask_category  AS askCategory  -- 문의 카테고리 PK
+			,reg_id	       AS regId	       -- 회원 아이디 FK(등록인)
+			,category_name AS categoryName -- 카테고리명
+			,reg_date	   AS regDate	   -- 등록일
+			,use_check 	   AS useCheck	   -- 사용 여부
+		FROM 
+			tb_customer_ask_category       -- 고객 문의 카테고리 테이블     	 					
+		WHERE ask_category = #{askCategory}; -- 특정 고객 문의 카테고리의 PK					
+    </select>	
+	
+	<!-- ==============================고객 문의 카테고리============================== -->
+	
+	<!-- ==============================자주 묻는 질문 카테고리============================== -->
+	
+	<!-- 자주 묻는 질문 카테고리 목록 -->
+	<resultMap  type="RegularAskCategory"     id="regularAskCategoryListMap">
+		<id	    column="regular_ask_category" property="regularAskCategory"/> <!-- 자주 묻는 질문 카테고리 PK -->
+        <result column="category_name"        property="categoryName"/>		  <!-- 자주 묻는 질문 카테고리 -->
+        <result column="reg_id" 			  property="regId"/>		      <!-- 회원 아이디 FK(등록인) -->
+        <result column="use_check" 			  property="useCheck"/>			  <!-- 사용 여부 -->
+        <result column="reg_date" 		      property="regDate"/>			  <!-- 등록일 -->
+	</resultMap>
+    
+	<!-- 자주 묻는 질문 카테고리 목록 조희 -->
+    <select id="getRegularAskCategoryList" resultMap="regularAskCategoryListMap">
+    	/* 자주 묻는 질문 카테고리 목록 조희 */
+    	SELECT 
+	    	 rCategory.regular_ask_category       -- 자주 묻는 질문 카테고리 PK
+	 		,rCategory.category_name		      -- 자주 묻는 질문 카테고리
+		    ,rCategory.reg_id					  -- 회원 아이디 FK(등록인)
+		    ,rCategory.use_check				  -- 사용 여부
+		    ,rCategory.reg_date					  -- 등록일
+		FROM 
+			tb_regular_ask_category AS rCategory; -- 자주 묻는 질문 카테고리 테이블
+    </select>
+    
+	<!-- 특정 자주 묻는 질문 카테고리 조희 -->
+    <select id="getRegularAskCategoryByPK" parameterType="String" resultType="RegularAskCategory">
+    	/* 특정 자주 묻는 질문 카테고리 조희 */
+    	SELECT 
+	    	 rCategory.regular_ask_category AS regularAskCategory -- 자주 묻는 질문 카테고리 PK
+	 		,rCategory.category_name 		AS categoryName	      -- 자주 묻는 질문 카테고리
+		    ,rCategory.reg_id 				AS regId		      -- 회원 아이디 FK(등록인)
+		    ,rCategory.use_check 			AS useCheck	    	  -- 사용 여부
+		    ,rCategory.reg_date 			AS regDate		      -- 등록일
+		FROM 
+			tb_regular_ask_category AS rCategory 		    	  -- 자주 묻는 질문 카테고리 테이블
+		WHERE regular_ask_category = #{regularAskCategory}; 	  -- 특정 자주 묻는 질문 카테고리의 PK	
+    </select>
+    
+	<!-- ==============================자주 묻는 질문 카테고리============================== -->
+	
+	<!-- ==============================게시판 카테고리============================== -->
+	
+	<!-- 게시판 카테고리 목록 -->
+	<resultMap  type="BoardCategory"    id="boardCategoryListMap">
+		<id	    column="board_category" property="boardCategory"/> 		<!-- 게시판 카테고리 PK -->
+        <result column="category_name"  property="categoryName"/>		<!-- 카테고리명 -->
+        <result column="reg_id" 		property="regId"/>		        <!-- 회원 아이디 FK(등록인) -->
+        <result column="reg_date" 		property="regDate"/>			<!-- 등록일 -->
+        <result column="use_check" 		property="useCheck"/>			<!-- 사용 여부 -->
+	</resultMap>
+    
+	<!-- 게시판 카테고리 목록 조희 -->
+    <select id="getBoardCategoryList" resultMap="boardCategoryListMap">
+    	/* 게시판 카테고리 목록 조희 */
+		SELECT 
+			 board_category   -- 게시판 카테고리 PK
+			,category_name 	  -- 카테고리명
+			,reg_id	          -- 회원 아이디 FK(등록인)
+			,reg_date	      -- 등록일
+			,use_check 		  -- 사용 여부
+		FROM 
+			tb_board_category; -- 게시판 카테고리 테이블 	  
+    </select>
+    
+	<!-- 특정 게시판 카테고리 조희 -->
+    <select id="getBoardCategoryByPK" parameterType="String" resultType="BoardCategory">
+    	/* 특정 게시판 카테고리 조희 */
+		SELECT 
+			 board_category AS boardCategory 	  -- 게시판 카테고리 PK
+			,category_name  AS categoryName	 	  -- 카테고리명
+			,reg_id	        AS regId   		 	  -- 회원 아이디 FK(등록인)
+			,reg_date	    AS regDate 		 	  -- 등록일
+			,use_check 	    AS useCheck	  	 	  -- 사용 여부
+		FROM 
+			tb_board_category 					  -- 게시판 카테고리 테이블 	
+		WHERE 
+			board_category = #{boardCategory}; 	  -- 특정 게시판 카테고리의 PK
+    </select>
+	
+	<!-- ==============================게시판 카테고리============================== -->
+	
+	<!-- ==============================신고 대상 카테고리============================== -->
+	
+	<!-- 신고 대상 카테고리 목록 -->
+	<resultMap  type="ReportCategory"    id="reportCategoryListMap">
+		<id	    column="report_category" property="reportCategory"/> 	<!-- 게시판 카테고리 PK -->
+        <result column="category_name"   property="categoryName"/>		<!-- 카테고리명 -->
+        <result column="user_id" 		 property="userId"/>		    <!-- 회원 아이디 FK(등록인) -->
+        <result column="reg_date" 		 property="regDate"/>			<!-- 등록일 -->
+        <result column="use_check" 		 property="useCheck"/>			<!-- 사용 여부 -->
+	</resultMap>
+	
+	<!-- 신고 대상 카테고리 목록 조희 -->
+    <select id="getReportCategoryList" resultMap="reportCategoryListMap">
+    	/* 신고 대상 카테고리 목록 조희 */
+		SELECT 
+			 report_category    -- 신고 카테고리 PK
+			,category_name	    -- 카테고리명
+			,user_id		    -- 회원 아이디 FK(등록인)
+			,reg_date 		    -- 등록일
+			,use_check 		    -- 사용 여부
+		FROM 
+			tb_report_category; -- 신고 대상 카테고리 테이블 	    	
+    </select>
+    
+	<!-- 특정 신고 대상 카테고리 조희 -->
+    <select id="getReportCategoryByPK" parameterType="String" resultType="ReportCategory">
+    	/* 특정 신고 대상 카테고리 조희 */
+		SELECT 
+			 report_category AS reportCategory	 -- 신고 카테고리 PK
+			,category_name   AS categoryName   	 -- 카테고리명
+			,user_id		 AS userId	       	 -- 회원 아이디 FK(등록인)
+			,reg_date 		 AS	regDate        	 -- 등록일
+			,use_check 		 AS	useCheck       	 -- 사용 여부
+		FROM 
+			tb_report_category 				   	 -- 신고 대상 카테고리 테이블 	    	
+		WHERE 
+			report_category = #{reportCategory}; -- 특정 신고 대상 카테고리의 PK	
+    </select>
+	
+	<!-- ==============================신고 대상 카테고리============================== -->
+	
+	<!-- ==============================판매 상품 카테고리 대분류============================== -->
+	
+	<!-- 판매 상품 카테고리 대분류 목록 -->
+	<resultMap  type="GoodsLargeCategory"     id="goodsLargeCategoryListMap">
+		<id	    column="goods_large_category" property="goodsLargeCategory"/> <!-- 판매 상품 카테고리 대분류 PK -->
+        <result column="goods_category"  	  property="goodsCategory"/>	  <!-- 카테고리 대분류 -->
+        <result column="reg_id" 			  property="regId"/>		  	  <!-- 회원 아이디 FK(작성자) -->
+        <result column="use_check" 		      property="useCheck"/>		      <!-- 사용 여부 -->
+        <result column="reg_date" 		      property="regDate"/>		      <!-- 등록일 -->
+	</resultMap>
+	
+	<!-- 판매 상품 카테고리 대분류 목록 조희 -->
+    <select id="getGoodsLargeCategoryList" resultMap="goodsLargeCategoryListMap">
+    	/* 판매 상품 카테고리 대분류 목록 조희 */
+		SELECT 
+			 goods_large_category 	 -- 판매 상품 카테고리 대분류 PK
+			,goods_category 		 -- 카테고리 대분류
+			,reg_id 				 -- 회원 아이디 FK(작성자)
+			,use_check 				 -- 사용 여부
+			,reg_date 			     -- 등록일
+		FROM 
+			tb_goods_large_category; -- 판매 상품 카테고리 대분류 테이블     	
+    </select>
+    
+	<!-- 특정 판매 상품 카테고리 대분류 조희 -->
+    <select id="getGoodsLargeCategoryByPK" parameterType="String" resultType="GoodsLargeCategory">
+    	/* 특정 판매 상품 카테고리 대분류 조희 */
+		SELECT 
+			 goods_large_category AS goodsLargeCategory   -- 판매 상품 카테고리 대분류 PK
+			,goods_category 	  AS goodsCategory		  -- 카테고리 대분류
+			,reg_id 			  AS regId		 		  -- 회원 아이디 FK(작성자)
+			,use_check 			  AS useCheck		 	  -- 사용 여부
+			,reg_date 			  AS regDate	     	  -- 등록일
+		FROM 
+			tb_goods_large_category 					  -- 판매 상품 카테고리 대분류 테이블     	
+		WHERE
+			goods_large_category = #{goodsLargeCategory}; -- 특정 판매 상품 카테고리 대분류의 PK				
+    </select>
+	
+	<!-- ==============================판매 상품 카테고리 대분류============================== -->
+	
+	<!-- ==============================판매 상품 카테고리 소분류============================== -->
+	
+	<!-- 판매 상품 카테고리 소분류 목록 -->
+	<resultMap  type="GoodsSmallCategory"     id="goodsSmallCategoryListMap">
+		<id	    column="goods_small_category" property="goodsSmallCategory"/> <!-- 판매 상품 카테고리 소분류 PK -->
+		<id	    column="goods_large_category" property="goodsLargeCategory"/> <!-- 판매 상품 카테고리 대분류 FK -->
+        <result column="small_category_name"  property="smallCategoryName"/>  <!-- 판매 상품 소분류 -->
+        <result column="reg_id" 			  property="regId"/>		  	  <!-- 회원 아이디 FK(작성자) -->
+        <result column="use_check" 		      property="useCheck"/>		      <!-- 사용 여부 -->
+        <result column="reg_date" 		      property="regDate"/>		      <!-- 등록일 -->
+	</resultMap>
+	
+	<!-- 판매 상품 카테고리 소분류 목록 조희 -->
+    <select id="getGoodsSmallCategoryList" resultMap="goodsSmallCategoryListMap">
+    	/* 판매 상품 카테고리 소분류 목록 조희 */
+		SELECT 
+			 goods_small_category    -- 판매 상품 카테고리 소분류 PK
+			,goods_large_category    -- 판매 상품 카테고리 대분류 FK
+			,small_category_name 	 -- 판매 상품 소분류
+			,reg_id 			     -- 회원 아이디 FK(작성자)
+			,reg_date 			     -- 등록일
+			,use_check 				 -- 사용 여부
+			,reg_id 			     -- 등록일
+		FROM 
+			tb_goods_small_category; -- 판매 상품 카테고리 소분류 테이블     		
+    </select>
+    
+	<!-- 특정 판매 상품 카테고리 소분류 조희 -->
+    <select id="getGoodsSmallCategoryByPK" parameterType="String" resultType="GoodsSmallCategory">
+    	/* 특정 판매 상품 카테고리 소분류 조희 */
+		SELECT 
+			 goods_small_category AS goodsSmallCategory   -- 판매 상품 카테고리 소분류 PK
+			,goods_large_category AS goodsLargeCategory   -- 판매 상품 카테고리 대분류 FK
+			,small_category_name  AS smallCategoryName	  -- 판매 상품 소분류
+			,reg_id 			  AS regId 				  -- 회원 아이디 FK(작성자)
+			,use_check 			  AS useCheck		      -- 사용 여부
+			,reg_id 			  AS regDate  			  -- 등록일
+		FROM 
+			tb_goods_small_category 			    	  -- 판매 상품 카테고리 소분류 테이블     		
+		WHERE
+			goods_small_category = #{goodsSmallCategory}; -- 특정 판매 상품 카테고리 소분류의 PK				
+    </select>
+	
+	<!-- ==============================판매 상품 카테고리 소분류============================== -->
+	
+	<!-- ==============================상품 문의 카테고리============================== -->
+	
+	<!-- 상품 문의 카테고리 목록 -->
+	<resultMap type="GoodsQnaCategory" 		id="goodsQnaCategoryListMap">
+		<id	    column="goods_qna_category" property="goodsQnaCategory"/> <!-- 상품 문의 카테고리 PK -->
+		<result column="reg_id" 			property="regId"/>		  	  <!-- 회원 아이디 FK(등록인) -->
+		<result	column="category_name" 		property="categoryName"/> 	  <!-- 카테고리명 -->
+		<result column="reg_date" 		    property="regDate"/>		  <!-- 등록일 -->
+		<result column="modify_date"  		property="modifyDate"/>  	  <!-- 수정일 -->
+		<result column="use_check" 		    property="useCheck"/>		  <!-- 사용 여부 -->
+	</resultMap>
+		
+	<!-- 상품 문의 카테고리 목록 조희 -->
+    <select id="getGoodsQnaCategoryList" resultMap="goodsQnaCategoryListMap">
+    	/* 상품 문의 카테고리 목록 조희 */
+		SELECT 
+			 goods_qna_category	   -- 상품 문의 카테고리 PK
+			,reg_id 			   -- 회원 아이디 FK(등록인)
+			,category_name 		   -- 카테고리명
+			,reg_date			   -- 등록일
+			,modify_date		   -- 수정일
+			,use_check			   -- 사용 여부
+		FROM 
+			tb_goods_qna_category; -- 상품 문의 카테고리 테이블	
+    </select>
+    
+	<!-- 특정 상품 문의 카테고리 조희 -->
+    <select id="getGoodsQnaCategoryByPK" parameterType="String" resultType="GoodsQnaCategory">
+    	/* 특정 상품 문의 카테고리 조희 */
+		SELECT 
+			 goods_qna_category AS goodsQnaCategory   -- 상품 문의 카테고리 PK
+			,reg_id 			AS regId  			  -- 회원 아이디 FK(등록인)
+			,category_name 		AS categoryName       -- 카테고리명
+			,reg_date			AS regDate  		  -- 등록일
+			,modify_date		AS modifyDate  		  -- 수정일
+			,use_check			AS useCheck  		  -- 사용 여부
+		FROM 
+			tb_goods_qna_category  					  -- 상품 문의 카테고리 테이블	
+		WHERE
+			goods_qna_category = #{goodsQnaCategory}; -- 특정 상품 문의 카테고리의 PK				
+    </select>
+	
+	<!-- ==============================상품 문의 카테고리============================== -->
+	
+	
+	
     <resultMap 	type="GoodsLargeCategory" 		id="GoodsLargeCategoryMap">
 		<id 	column="goods_large_category" 	property="goodsLargeCategory"/>
 		<result column="goods_category" 		property="goodsCategory"/>

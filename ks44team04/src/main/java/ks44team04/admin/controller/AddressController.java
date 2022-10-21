@@ -21,10 +21,11 @@ public class AddressController {
     }
 
     @GetMapping("/list")
-    public String addressList(@RequestParam(value = "userId", required = false) String userId, Model model) {
-        userId = "buyer01";
+    public String getAddressList(@RequestParam(value = "searchId", required = false) String searchId, Model model) {
         Map<String, String> addressInfo = new HashMap<>();
-        addressInfo.put("userId", userId);
+        if (searchId != null || "".equals(searchId)) {
+            addressInfo.put("userId", searchId);
+        }
         List<AddressList> addressLists = addressService.getAddressList(addressInfo);
         model.addAttribute("addressList", addressLists);
         return "admin/order/addressList";
@@ -41,13 +42,13 @@ public class AddressController {
     }
 
     @PostMapping("/modify")
-    public String addressModify(AddressList addressList) {
+    public String setAddressModify(AddressList addressList) {
         addressService.addressModify(addressList);
         return "redirect:/admin/address/list";
     }
 
-    @GetMapping("/delete/{addressList}")
-    public String getAddressDelete(@PathVariable("addressList") String addressList) {
+    @DeleteMapping("/{addressList}")
+    public String setAddressDelete(@PathVariable("addressList") String addressList) {
         addressService.addressDelete(addressList);
         return "redirect:/admin/address/list";
     }

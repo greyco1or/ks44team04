@@ -21,8 +21,8 @@
 		<result column="suspend_day" 		property="suspendDay"/>
 		<result column="start_suspend"  	property="startSuspend"/>
 		<result column="end_suspend" 		property="endSuspend"/>
-		<result column="suspend_result" 		property="suspendResult"/>
-		<result column="suspend_reason" 		property="suspendReason"/>
+		<result column="suspend_result" 	property="suspendResult"/>
+		<result column="suspend_reason" 	property="suspendReason"/>
 	</resultMap>
 
     <resultMap type="Report" id="reportListResultMap">
@@ -64,9 +64,7 @@
         <result column="user_name" 		property="userName"/>
     </resultMap>
    
-   
-    
-    
+     
      <!-- 신고 하기 -->
      <insert id="setReport" parameterType="Report" >
      INSERT INTO tb_report
@@ -106,7 +104,7 @@
      </insert>
 	
    
-   <!-- 유저 포인트 업데이트 -->  
+   <!-- 유저 벌점 포인트 업데이트 -->  
     <update id="reportPoint" parameterType="User">
        
         UPDATE tb_user
@@ -191,8 +189,9 @@
 			tb_user AS s
 			on
 			r.reported_id = s.user_id
-		where
-			r.report_history_code = #{reportHistoryCode};
+		WHERE 
+			report_history_code= #{reportHistoryCode};
+     
      </select>
      
 
@@ -273,12 +272,16 @@
 			tb_report_rule AS u
 			on
 			r.report_code = u.report_code
-		   <trim prefix="WHERE" prefixOverrides="AND |OR ">
+		   <trim prefix="WHERE" prefixOverrides="AND">
 			   	<if test="sv != null and sv != ''">
 			   		${sk} LIKE CONCAT('%',#{sv},'%')
 			   	</if>
-			   	
-			   
+			   	<if test="fd != null and fd !='' and td != null and td !=''">
+					AND
+					r.report_date <![CDATA[>]]> (#{fd})
+					AND
+					r.report_date <![CDATA[<]]> (#{td})
+				</if>
 		   </trim>
 		   ORDER BY r.report_history_code DESC 
 	</select>
@@ -300,8 +303,22 @@
 	ORDER BY s.user_suspend_code DESC 
     </select>
     
+    <select id="getUserSuspendUpdateList" resultMap="userSuspendListResultMap" fetchSize="100">
+    	/* 정지 해제 목록조회 */
+		SELECT 
+			 s.user_suspend_code
+			,s.suspend_id
+		FROM 
+			tb_user_suspend AS s
+		where
+			s.end_suspend <![CDATA[<]]> NOW()
+			and
+			s.suspend_result <![CDATA[<>]]> '해제'
+		ORDER BY s.user_suspend_code DESC;
+    </select>
+    
 
-       <!-- 정지 검색  -->
+    <!-- 정지 검색  -->
 	<select id="getSuspendSearch" parameterType="map" resultMap="userSuspendListResultMap" fetchSize="100">
 	/* 정지검색  */
 		 SELECT 
@@ -315,13 +332,149 @@
 			,s.suspend_reason 
 		FROM 
 			tb_user_suspend AS s
-		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+		<trim prefix="WHERE" prefixOverrides="AND">
 			<if test="sv != null and sv != ''">
 				${sk} LIKE CONCAT('%',#{sv},'%')
+			</if>
+			<if test="fd != null and fd !='' and td != null and td !=''">
+				AND
+				${dk} <![CDATA[>]]> (#{fd})
+				AND
+				${dk} <![CDATA[<]]> (#{td})
 			</if>
 	   </trim>
 		 ORDER BY s.user_suspend_code DESC 
 	</select>
+
+	<!-- 정지 등록 (관리자) -->
+	<insert id="suspendAdd" parameterType="UserSuspend" >
+	/* 정지 등록 (관리자) */
+		INSERT INTO tb_user_suspend
+		 	(user_suspend_code
+		 	 ,suspend_id 
+		 	 ,approve_id 
+		 	 ,suspend_day
+		 	 ,start_suspend
+		 	 ,end_suspend
+		 	 ,suspend_result
+		 	 ,suspend_reason)
+		VALUES 
+			(#{userSuspendCode}
+			,#{suspendId}
+			,#{approveId}
+			,0
+			,#{startSuspend}
+			,#{endSuspend}
+			,#{suspendResult}
+			,#{suspendReason})
+	</insert>
+	
+	<!-- 정지 날자 업데이트 (관리자) -->
+	<update id="suspendDayUp" parameterType="UserSuspend">
+	UPDATE tb_user_suspend
+		SET
+			suspend_day = DATEDIFF(end_suspend , start_suspend )
+		WHERE 
+			user_suspend_code = #{userSuspendCode};
+	</update>
+	<!-- 정지 업데이트시 유저 상태 정지로 업데이트 -->
+	<update id="reportUserUp" parameterType="User">
+	UPDATE tb_user
+	 <trim prefix="SET" prefixOverrides=",">
+		user_status = '정지'
+	</trim>
+	WHERE 
+		 user_id = #{userId};
+	</update>
+	
+	<!-- 정지 등록 코드 증가 -->
+	<select id="getUserSuspendCods" resultType="String">
+	SELECT 
+		user_suspend_code
+	FROM 
+		tb_user_suspend 
+	ORDER BY user_suspend_code DESC LIMIT 1
+	</select>
+	
+	<!-- 정지 등록시 필요한 유저 아이디 / 닉네임 값 가져오기  -->
+	<select id="userList" resultMap="userResultMap">
+	/*정지 등록시 필요한 유저 아이디 / 닉네임 값 가져오기 */
+	
+	SELECT 
+		u.user_id
+		,u.user_name
+		,user_penalty
+	FROM 
+		tb_user AS u
+		
+	</select>
+	
+	<!-- 특정 정지 목록  -->
+	<select id="SuspendUpList" parameterType="String" resultMap="userSuspendListResultMap">
+	/* 특정 정지 목록 */
+		SELECT
+			 s.user_suspend_code
+			,s.suspend_id
+			,s.approve_id
+			,s.suspend_day
+			,s.start_suspend
+			,s.end_suspend
+			,s.suspend_result
+			,s.suspend_reason 
+		FROM 
+			tb_user_suspend AS s
+		WHERE 
+		user_suspend_code = #{userSuspendCode};
+
+	</select>
+	
+	<!-- 정지 리스트 수정-->
+	<update id="suspendListUp" parameterType="UserSuspend">
+	/*정지 리스트 수정 */
+	UPDATE tb_user_suspend
+	 <trim prefix="SET" prefixOverrides=",">
+	 	approve_id = #{approveId}
+		<if test="suspendReason != null and suspendReason != ''">
+			,suspend_reason = #{suspendReason}
+		</if>
+		<if test="suspendResult != null and suspendResult != ''">
+			 ,suspend_result= #{suspendResult}
+		</if>
+	</trim>
+		WHERE 
+			user_suspend_code = #{userSuspendCode}
+	</update>	
+		
+	 <!-- 특정 시간 마다 확인 후 정지 해제 --> 
+	 <update id="unstopping" parameterType="list">
+	 	/*특정 시간 마다 확인 후 정지 해제 */
+	 	UPDATE tb_user_suspend 
+		SET 
+			suspend_result = '해제'
+		WHERE
+			user_suspend_code IN 
+					<foreach collection="userSuspendUpdateList" item="item" 
+                    			separator="," open="(" close=")">
+                    	#{item.userSuspendCode}
+                    </foreach>
+	 </update>
+	 
+	 <!-- 정지해제 확인 후 유저 상태 변경 --> 
+	 <update id="suspendUserUpdate" parameterType="list">
+	 	/* 정지해제 확인 후 유저 상태 변경 */
+	 	UPDATE tb_user
+		SET 
+			user_status = '정상'
+		WHERE
+			user_id IN 
+				 <foreach collection="userSuspendUpdateList" item="item" 
+                 			separator="," open="(" close=")">
+                 	#{item.suspendId}
+                 </foreach>
+	 </update>
+	
+	
+	<!-- 벌점 기준 목록  -->
 	
 	<select id="reportRuleList" resultMap="reportRuleListResultMap">
 	/* 벌점 기준 목록 */
@@ -338,23 +491,106 @@
 		
 	</select>
 	
-	
-	
-	
-	<!-- 정지 등록시 필요한 유저 아이디 / 닉네임 값 가져오기  -->
-	<select id="userList" resultMap="userResultMap">
-	/*정지 등록시 필요한 유저 아이디 / 닉네임 값 가져오기 */
-	
-	SELECT 
-		u.user_id
-		,u.user_name
-		,user_penalty
+	<!--벌겸 기준 목록 검색  -->
+	<select id="ruleListSaerch" parameterType="map" resultMap="reportRuleListResultMap" fetchSize="100">
+	/* 특정 기준 목록 검색  */
+	SELECT
+		r.report_code
+		,r.report_reason
+		,r.report_date
+		,r.user_id
+		,r.use_check
+		,r.penalty_point 
 	FROM 
-		tb_user AS u
-		
+		tb_report_rule AS r
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<if test="sv != null and sv != ''">
+				${sk} LIKE CONCAT('%',#{sv},'%')
+			</if>
+			<if test="fd != null and fd !='' and td != null and td !=''">
+				AND
+				r.report_date <![CDATA[>]]> (#{fd})
+				AND
+				r.report_date<![CDATA[<]]> (#{td})
+			</if>
+	   </trim>
 	</select>
 	
+	<!--벌겸 기준 목록 코드 증가   -->
+	<select id="reportRuleCode" resultType="String">
+	SELECT
+		r.report_code
+	FROM 
+		tb_report_rule AS r
+	ORDER BY report_code DESC LIMIT 1	
+	</select>
+	
+    <!--벌겸 기준 목록 등록  -->
+    <insert id="reportRuleAdd" parameterType="ReportRule" >
+	/* 벌점 기준 목록 등록 (관리자) */
+	INSERT INTO tb_report_rule
+		(report_code
+		 ,report_reason 
+		 ,report_date 
+		 ,user_id
+		 ,use_check
+		 ,penalty_point)
+	VALUES 
+		(#{reportCode}
+		,#{reportReason}
+		,NOW()
+		,#{userId}
+		,#{useCheck}
+		,#{penaltyPoint})
+	</insert>
+	
+	<!-- 벌점 기준 목록 삭제 -->
+	<delete id="reportRuleDelete"  parameterType="ReportRule" >
+	/*벌전 기준 목록 삭제*/
+	DELETE 
+	FROM
+		tb_report_rule
+	WHERE 
+		report_code = #{reportCode}
+	</delete>
 	
 	
-    
+	<!-- 벌점 기준 목록 수정 -->
+	<update id="reportRuleUp" parameterType="ReportRule">
+	/*벌점 기준 목록 수정 */
+	UPDATE tb_report_rule
+	 <trim prefix="SET" prefixOverrides=",">
+		<if test="reportReason != null and reportReason != ''">
+			 report_reason= #{reportReason}
+		</if>
+			,report_date = NOW()
+			,user_id = #{userId}
+		<if test="useCheck != null and useCheck != ''">
+			,use_check = #{useCheck}
+		</if>
+			
+		<if test="penaltyPoint != null and penaltyPoint != ''">
+			,penalty_point = #{penaltyPoint}
+		</if>
+	</trim>
+		WHERE 
+			report_code = #{reportCode}
+	</update>
+	
+	<!-- 특정 벌점 기준 목록  -->
+	<select id="reportRuleUpList" parameterType="String" resultMap="reportRuleListResultMap">
+	/* 특정 벌점 기준 목록 */
+	SELECT
+		r.report_code
+		,r.report_reason
+		,r.report_date
+		,r.user_id
+		,r.use_check
+		,r.penalty_point 
+	FROM 
+		tb_report_rule AS r
+	WHERE 
+		r.report_code = #{reportCode};
+		
+	</select>
 </mapper>

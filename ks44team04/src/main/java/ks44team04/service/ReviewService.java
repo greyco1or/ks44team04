@@ -37,21 +37,33 @@ public class ReviewService {
 		return reviewList;
 	}
 	
+	//후기 등록 
+	public void reviewAdd(Review review){
+		reviewMapper.reviewAdd(review);
+	}
+	
+	//후기 등록  코드 증가 
+	public String getReviewListCode() {
+		String getReviewListCode = reviewMapper.getReviewListCode();
+		return getReviewListCode;
+	}
+	
+	//후기 목록 삭제 
+	 public void reviewListDelete(Review review) {
+	    	reviewMapper.reviewListDelete(review);
+	    }
+	
+	//후기 목록 댓글 목록 동시 삭제
+    public void reviewListCommentDelete(ReviewComment reviewComment) {
+    	reviewMapper.reviewListCommentDelete(reviewComment);
+    }
+    
 	//후기 검색
     public List<Review> reviewSerchList(Map<String, Object> paramMap){
     	List<Review> reviewList = reviewMapper.reviewSerchList(paramMap);
     	return reviewList;
     }
 
-	
-    //후기 댓글 목록
-    public List<ReviewComment> reviewComment(){
-    	List<ReviewComment> reviewComment = reviewMapper.reviewComment();
-    	
-    	return reviewComment;
-    	
-    }
-    
     //후기 추천 
     public void reviewLike(ReviewLike reviewLike) {
     	int result = reviewMapper.reviewLike(reviewLike);
@@ -64,7 +76,7 @@ public class ReviewService {
     	log.info("추천 해제 :" + result);
     }
     
-  //후기 등록 코드 증가 
+    //후기 등록 코드 증가 
     public String ReviewLikeCode() {
     	String ReviewLikeCode = reviewMapper.ReviewLikeCode();
     	return ReviewLikeCode;
@@ -74,7 +86,23 @@ public class ReviewService {
     public void reviewLikeUp(Review review) {
     	reviewMapper.reviewLikeUp(review);
     }
+
+    //후기 댓글 목록
+    public List<ReviewComment> reviewComment(){
+    	List<ReviewComment> reviewComment = reviewMapper.reviewComment();
+    	
+    	return reviewComment;
+    	
+    }
     
+    //후기 댓글 목록 검색
+    public List<ReviewComment> reviewCommentSaerch(Map<String, Object> paramMap){
+    	List<ReviewComment> ReviewCommentSaerch = reviewMapper.reviewCommentSaerch(paramMap);
+    	return ReviewCommentSaerch;
+    }
     
-	
+    //후기 댓글 목록 삭제
+    public void reviewCommentDelete(ReviewComment reviewComment) {
+    	reviewMapper.reviewCommentDelete(reviewComment);
+    }
 }

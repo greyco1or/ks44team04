@@ -1,5 +1,7 @@
 package ks44team04.dto;
 
+import java.util.List;
+
 public class Goods {
 
     private String goodsCode;
@@ -7,6 +9,7 @@ public class Goods {
     private String sellerId;
     private String goodsName;
     private String goodsContent;
+    private String goodsDetail;
     private int goodsPrice;
     private int goodsDiscountRate;
     private int goodsPostPrice;
@@ -17,9 +20,48 @@ public class Goods {
     private String regularDeliverCheck;
     private String regDate;
     private String modifyDate;
-    private int goodsReportAmount;
     private String goodsFile;
     
+    /* ~~~ 시작 ~~~ */
+    
+    //이미지 업로드
+	private FileDto fileInfo;
+	public FileDto getFileInfo() {
+		return fileInfo;
+	}
+	public void setFileInfo(FileDto fileInfo) {
+		this.fileInfo = fileInfo;
+	}
+    
+	//이미지 리스트 
+	private List<FileDto> fileList;
+	
+    public List<FileDto> getFileList() {
+		return fileList;
+	}
+	public void setFileList(List<FileDto> fileList) {
+		this.fileList = fileList;
+	}
+
+	//문의 답변
+	private GoodsQnaAnswer goodsAnswerInfo;
+	public GoodsQnaAnswer getGoodsAnswerInfo() {
+		return goodsAnswerInfo;
+	}
+	public void setGoodsAnswerInfo(GoodsQnaAnswer goodsAnswerInfo) {
+		this.goodsAnswerInfo = goodsAnswerInfo;
+	}
+	
+	//문의
+	private GoodsQna goodsQnaInfo;
+	public GoodsQna getGoodsQnaInfo() {
+		return goodsQnaInfo;
+	}
+	public void setGoodsQnaInfo(GoodsQna goodsQnaInfo) {
+		this.goodsQnaInfo = goodsQnaInfo;
+	}
+    
+	//유저
 	private User userInfo;
 	public User getUserInfo() {
 		return userInfo;
@@ -27,7 +69,8 @@ public class Goods {
 	public void setUserInfo(User userInfo) {
 		this.userInfo = userInfo;
 	}
-
+	
+	//스몰카테고리
 	private GoodsSmallCategory goodsSmallCategoryInfo;
 	public GoodsSmallCategory getGoodsSmallCategoryInfo() {
 		return goodsSmallCategoryInfo;
@@ -36,6 +79,7 @@ public class Goods {
 		this.goodsSmallCategoryInfo = goodsSmallCategoryInfo;
 	}
 	
+	//라지카테고리
 	private GoodsLargeCategory goodsLargeCategoryInfo;
 	public GoodsLargeCategory getGoodsLargeCategoryInfo() {
 		return goodsLargeCategoryInfo;
@@ -43,7 +87,7 @@ public class Goods {
 	public void setGoodsLargeCategoryInfo(GoodsLargeCategory goodsLargeCategoryInfo) {
 		this.goodsLargeCategoryInfo = goodsLargeCategoryInfo;
 	}
-	
+	/* ~~~ 끝 ~~~ */
 	
 	public String getGoodsCode() {
         return goodsCode;
@@ -83,6 +127,14 @@ public class Goods {
 
     public void setGoodsContent(String goodsContent) {
         this.goodsContent = goodsContent;
+    }
+    
+	public String getGoodsDetail() {
+		return goodsDetail;
+    }
+        
+	public void setGoodsDetail(String goodsDetail) {
+		this.goodsDetail = goodsDetail;
     }
 
     public int getGoodsPrice() {
@@ -165,14 +217,6 @@ public class Goods {
     	this.modifyDate = modifyDate;
     }
 
-    public int getGoodsReportAmount() {
-        return goodsReportAmount;
-    }
-
-    public void setGoodsReportAmount(int goodsReportAmount) {
-        this.goodsReportAmount = goodsReportAmount;
-    }
-
     public String getGoodsFile() {
         return goodsFile;
     }
@@ -182,24 +226,16 @@ public class Goods {
     }
 
     @Override
-    public String toString() {
-        return "Goods{" +
-                "goodsCode='" + goodsCode + '\'' +
-                ", goodsSmallCategory='" + goodsSmallCategory + '\'' +
-                ", sellerId='" + sellerId + '\'' +
-                ", goodsName='" + goodsName + '\'' +
-                ", goodsContent='" + goodsContent + '\'' +
-                ", goodsPrice=" + goodsPrice +
-                ", goodsDiscountRate=" + goodsDiscountRate +
-                ", goodsPostPrice=" + goodsPostPrice +
-                ", goodsStock=" + goodsStock +
-                ", soldoutCheck='" + soldoutCheck + '\'' +
-                ", stopSaleCheck='" + stopSaleCheck + '\'' +
-                ", packagePostCheck='" + packagePostCheck + '\'' +
-                ", regularDeliverCheck='" + regularDeliverCheck + '\'' +
-                ", regDate='" + regDate + '\'' +
-                ", goodsReportAmount=" + goodsReportAmount +
-                ", goodsFile='" + goodsFile + '\'' +
-                '}';
-    }
+	public String toString() {
+		return "Goods [goodsCode=" + goodsCode + ", goodsSmallCategory=" + goodsSmallCategory + ", sellerId=" + sellerId
+				+ ", goodsName=" + goodsName + ", goodsContent=" + goodsContent + ", goodsDetail=" + goodsDetail
+				+ ", goodsPrice=" + goodsPrice + ", goodsDiscountRate=" + goodsDiscountRate + ", goodsPostPrice="
+				+ goodsPostPrice + ", goodsStock=" + goodsStock + ", soldoutCheck=" + soldoutCheck + ", stopSaleCheck="
+				+ stopSaleCheck + ", packagePostCheck=" + packagePostCheck + ", regularDeliverCheck="
+				+ regularDeliverCheck + ", regDate=" + regDate + ", modifyDate=" + modifyDate + ", goodsFile="
+				+ goodsFile + ", fileInfo=" + fileInfo + ", fileList=" + fileList + ", goodsAnswerInfo="
+				+ goodsAnswerInfo + ", goodsQnaInfo=" + goodsQnaInfo + ", userInfo=" + userInfo
+				+ ", goodsSmallCategoryInfo=" + goodsSmallCategoryInfo + ", goodsLargeCategoryInfo="
+				+ goodsLargeCategoryInfo + "]";
+	}
 }

@@ -2,161 +2,94 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/userDefault}">
+      
+<th:block layout:fragment="customCss">
+<!-- 폰트 -->
+<link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
+<style>
+* { font-family: 'Spoqa Han Sans Neo', 'sans-serif'; color: #333;}
+.table {
+	width:800px;
+	margin-right:auto;
+	margin-left:auto;
+	border-top:2px solid #82ae4691;
+}
+.table tbody tr td {
+	padding: 7px 7px;
+}
+.boardAdd { 
+	margin-right: 55px;
+ 	right: 0px;
+ 	padding: 0px 10px;
+	position:absolute;
+	width: 110px;
+	height: 40px;
+	font-size: 15px;
+	background-color: #dbe6c4;
+	border:none;
+	border-radius:28px;
+}
+.boardAdd:focus{ 	
+    border: none;
+    outline:none;
+    }
 
-<th:block layout:fragment="customContents">
-
-    <div th:replace="/fragments/userHeader :: headerFragment"></div>
-
-    <section class="ftco-section ftco-cart">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 ftco-animate">
-                    <div class="cart-list">
-                        <table class="table">
-                            <thead class="thead-primary">
-                            <tr class="text-center">
-                                <th>&nbsp;</th>
-                                <th>&nbsp;</th>
-                                <th>Product name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr class="text-center">
-                                <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
-
-                                <td class="image-prod">
-                                    <div class="img" style="background-image:url(images/product-3.jpg);"></div>
-                                </td>
-
-                                <td class="product-name">
-                                    <h3>Bell Pepper</h3>
-                                    <p>Far far away, behind the word mountains, far from the countries</p>
-                                </td>
-
-                                <td class="price">$4.90</td>
-
-                                <td class="quantity">
-                                    <div class="input-group mb-3">
-                                        <input type="text" name="quantity" class="quantity form-control input-number"
-                                               value="1" min="1" max="100">
-                                    </div>
-                                </td>
-
-                                <td class="total">$4.90</td>
-                            </tr><!-- END TR-->
-
-                            <tr class="text-center">
-                                <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
-
-                                <td class="image-prod">
-                                    <div class="img" style="background-image:url(images/product-4.jpg);"></div>
-                                </td>
-
-                                <td class="product-name">
-                                    <h3>Bell Pepper</h3>
-                                    <p>Far far away, behind the word mountains, far from the countries</p>
-                                </td>
-
-                                <td class="price">$15.70</td>
-
-                                <td class="quantity">
-                                    <div class="input-group mb-3">
-                                        <input type="text" name="quantity" class="quantity form-control input-number"
-                                               value="1" min="1" max="100">
-                                    </div>
-                                </td>
-
-                                <td class="total">$15.70</td>
-                            </tr><!-- END TR-->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-end">
-                <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-                    <div class="cart-total mb-3">
-                        <h3>Coupon Code</h3>
-                        <p>Enter your coupon code if you have one</p>
-                        <form action="#" class="info">
-                            <div class="form-group">
-                                <label for="">Coupon code</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                        </form>
-                    </div>
-                    <p><a href="checkout.html" class="btn btn-primary py-3 px-4">Apply Coupon</a></p>
-                </div>
-                <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-                    <div class="cart-total mb-3">
-                        <h3>Estimate shipping and tax</h3>
-                        <p>Enter your destination to get a shipping estimate</p>
-                        <form action="#" class="info">
-                            <div class="form-group">
-                                <label for="">Country</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                            <div class="form-group">
-                                <label for="country">State/Province</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                            <div class="form-group">
-                                <label for="country">Zip/Postal Code</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                        </form>
-                    </div>
-                    <p><a href="checkout.html" class="btn btn-primary py-3 px-4">Estimate</a></p>
-                </div>
-                <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-                    <div class="cart-total mb-3">
-                        <h3>Cart Totals</h3>
-                        <p class="d-flex">
-                            <span>Subtotal</span>
-                            <span>$20.60</span>
-                        </p>
-                        <p class="d-flex">
-                            <span>Delivery</span>
-                            <span>$0.00</span>
-                        </p>
-                        <p class="d-flex">
-                            <span>Discount</span>
-                            <span>$3.00</span>
-                        </p>
-                        <hr>
-                        <p class="d-flex total-price">
-                            <span>Total</span>
-                            <span>$17.60</span>
-                        </p>
-                    </div>
-                    <p><a href="checkout.html" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="ftco-section ftco-no-pt ftco-no-pb py-5 bg-light">
-        <div class="container py-4">
-            <div class="row d-flex justify-content-center py-5">
-                <div class="col-md-6">
-                    <h2 style="font-size: 22px;" class="mb-0">Subcribe to our Newsletter</h2>
-                    <span>Get e-mail updates about our latest shops and special offers</span>
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <form action="#" class="subscribe-form">
-                        <div class="form-group d-flex">
-                            <input type="text" class="form-control" placeholder="Enter email address">
-                            <input type="submit" value="Subscribe" class="submit px-3">
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
+</style>
 </th:block>
 
+<th:block layout:fragment="customContents">
+<section class="ftco-section" style="padding:2em 0;">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="text-center" style="height:100px;">
+				<div style="font-size:25px;">자유게시판</div>
+            </div>
+        </div>
+        
+        
+        <!-- 테이블 시작 -->
+        <table class="table table-hover">
+			<thead>
+				<tr>
+					<th style="width: 60px;">번호</th>
+					<th>제목</th>
+					<th style="width: 100px;">작성자</th>
+					<th style="width: 110px;">작성일</th>
+					<th style="width: 90px;">조회수</th>
+					<th style="width: 90px;">좋아요</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:if="${not #lists.isEmpty(boardListUser)}" th:each="b, e : ${boardListUser}" >
+					<td th:text="${e.size - e.index}">1</td>
+					<td th:text="${b.boardTitle}" th:onclick="|location.href='@{/user/board/boardView(boardCode=${b.boardCode})}'|" style="padding-left:40px; text-align:left !important;"></td>
+					<td th:text="${b.userInfo.userNickname}"></td>
+					<td th:text="${#strings.substring(b.regDate,0,10)}"></td>
+					<td th:text="${b.viewAmount}"></td>
+					<td th:text="${b.likeAmount}"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div style="position: relative; width: 100%; height: 40px; display: flex; margin-top:10px;">
+			<button type="button" class="boardAdd">작성하기</button>
+		</div>
+		<hr style="margin-top:50px;">
+		
+	</div> 
+</section>
+</th:block>
+<th:block th:replace="fragments/userJs :: datatablesFragment"></th:block>
+<th:block layout:fragment="customJsScript">
+<script th:inline="javascript">
+//<a th:href="@{/user/board/boardAdd}">
+    $('.boardAdd').on('click', function(){
+    	if([[${session.SID}]] == null){
+    		alert('로그인 후 이용가능합니다.');
+    		location.href='/user/user/login';
+    	}else{
+    		location.href='/user/board/boardAdd';
+    	}
+    });
+</script>
+</th:block>
 </html>

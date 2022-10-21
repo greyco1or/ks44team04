@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,7 +44,8 @@ public class UserOrderController {
 
     @GetMapping("/checkout")
     public String checkout(Model model,
-                           @RequestParam(value = "goodsCode", required = false) String[] goodsCode) {
+                           @RequestParam(value = "goodsCode") String[] goodsCode,
+                           @RequestParam(value = "cartAmount") String[] cartAmount) {
         String userId = "buyer01";
         Map<String, String> addressInfo = new HashMap<>();
         addressInfo.put("userId", userId);
@@ -53,11 +55,14 @@ public class UserOrderController {
         model.addAttribute("addressList", addressLists);
         model.addAttribute("userPoint", userPoint);
 
-        goodsCode = new String[]{"WN895022", "WN895023"};
-        List<Goods> goodsList = new ArrayList<>();
-        for (String goods : goodsCode) {
-            Goods goodsInfo = orderService.getGoodsInfo(goods);
-            goodsList.add(goodsInfo);
+        Map<String, Object> resultMap = null;
+        List<Map<String, Object>> goodsList = new ArrayList<>();
+        for (int i = 0; i < goodsCode.length; i++) {
+            Goods goodsInfo = orderService.getGoodsInfo(goodsCode[i]);
+            resultMap = new HashMap<>();
+            resultMap.put("goodsCode", goodsInfo);
+            resultMap.put("cartAmount", Integer.parseInt(cartAmount[i]));
+            goodsList.add(resultMap);
         }
         model.addAttribute("goodsList", goodsList);
 
@@ -79,30 +84,29 @@ public class UserOrderController {
     }
 
     @GetMapping("/list")
-    public String orderList(Model model) {
-        String userId = "buyer01";
+    public String orderList(Model model, HttpSession session) {
+        String userId = (String) session.getAttribute("SID");
         List<OrderDetail> orderList = orderService.getOrderList(userId);
         model.addAttribute("orderList", orderList);
         return "user/order/orderList";
     }
 
-    @GetMapping("/detail")
-    public String orderDetail() {
+    /* 페이징 테스트 */
+    @GetMapping("/listtest")
+    public String orderListTest(@ModelAttribute(value = "paging") Paging paging, Model model) {
+        int totalContentsCount = orderService.getContentsCount();
+        paging.setPagination(new Pagination(paging, totalContentsCount));
+        paging.setCondition("buyer01");
 
-        return "user/order/orderDetail";
+        log.info("==================================={}", paging);
+        log.info("===================================2{}", paging.getPagination());
+        
+        List<OrderDetail> orderList = orderService.getOrderListTest(paging);
+        model.addAttribute("orderList", orderList);
+        
+        return "user/order/orderList_test";
     }
-
-    @GetMapping("/modify")
-    public String orderModify() {
-
-        return "user/order/orderModify";
-    }
-
-    @GetMapping("/cancel")
-    public String orderCancel() {
-
-        return "user/order/orderCancel";
-    }
+    /* 페이징 테스트 */
 
     @GetMapping("/postcheck/{postCode}")
     public String postCheck(@PathVariable(value = "postCode") String postInfo) {
@@ -199,34 +203,24 @@ public class UserOrderController {
     }
 
     @PostMapping("/end")
-    public String setOrder(Order order, OrderDetail orderDetail, OrderDetailStr orderDetailStr) {
-        String sessionId = "buyer01";
+    public String setOrder(Order order, OrderDetail orderDetail, OrderDetailStr orderDetailStr, PointDeal pointDeal,
+                           @RequestParam("couponStatusCode") String couponStatusCode,
+                           HttpSession session) {
+        String userId = (String) session.getAttribute("SID");
         String orderNum = orderService.getOrderNum();
 
         if (orderNum == null) {
             LocalDate now = LocalDate.now();
             DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyyMMdd");
             orderNum = now.format(format) + "001";
-        } else {
-            orderNum = CodeIndex.codeIndex(orderNum, 8);
-        }
+        } else {orderNum = CodeIndex.codeIndex(orderNum, 8); }
 
-        if ("".equals(order.getCouponCode())) {
-            order.setCouponCode(null);
-        }
+        if ("".equals(order.getCouponCode())) order.setCouponCode(null);
 
         order.setOrderNum(orderNum);
-        order.setBuyerId(sessionId);
+        order.setBuyerId(userId);
 
         orderService.setOrder(order);
-
-        log.info("=============================={}", orderDetailStr);
-        log.info("=============================={}", orderDetailStr.getGoodsCode());
-        log.info("=============================={}", (String[]) orderDetailStr.getGoodsCode().split(","));
-        log.info("=============================={}", orderDetailStr.getGoodsCode().split(",").length);
-        log.info("=============================={}", orderDetailStr.getGoodsCode().split(",")[0]);
-        log.info("=============================={}", orderDetailStr.getGoodsCode().split(",")[1]);
-
 
         for (int i = 0; i < orderDetailStr.getGoodsCode().split(",").length; i++) {
             orderDetail.setOrderDetailCode(orderNum + "_" + (i + 1));
@@ -239,8 +233,19 @@ public class UserOrderController {
             orderService.setOrderDetail(orderDetail);
         }
 
+        /* 포인트 사용 */
+        pointDeal.setUserId(userId);
+        pointDeal.setStatus("사용");
+        pointDeal.setPointDealReason("상품구매");
+        pointDeal.setPointDealReference(orderNum);
+        pointDeal.setPointDealPrice(-order.getUsePoint());
+        String dealId = pointService.addPointDeal(pointDeal);
+        pointService.addPointDetailMinus(dealId);
 
-        return "redirect:/user/order/checkout";
+        /* 쿠폰 사용 */
+        if (order.getCouponCode() != null) couponService.deleteCouponStatus(couponStatusCode);
+
+        return "redirect:/user/order/list";
     }
 
 }

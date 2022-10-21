@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,23 +25,27 @@ public class UserAddressController {
         this.addressService = addressService;
     }
 
-    @GetMapping("/list")
-    public String addressList(@RequestParam(value = "userId", required = false) String userId, Model model) {
-        userId = "buyer01";
+    @GetMapping("")
+    public String addressList(Model model, HttpSession session) {
+        String userId = (String) session.getAttribute("SID");
         Map<String, String> addressInfo = new HashMap<>();
         addressInfo.put("userId", userId);
         List<AddressList> addressLists = addressService.getAddressList(addressInfo);
         model.addAttribute("addressList", addressLists);
-        return "user/order/addressList";
+        return "user/order/address";
     }
 
     @GetMapping("/register")
-    public String addressRegister() {
-
-        return "user/order/addressRegister";
+    public String addressRegister(@RequestHeader(value = "Referer") String referer, Model model) {
+        if (referer != null && referer.contains("checkout")) {
+            model.addAttribute("checkout", "checkout");
+            return "user/order/checkoutAddressReg";
+        }
+        return "user/order/addressReg";
     }
     @PostMapping("/register")
-    public String addressRegister(AddressList addressList) {
+    public String addressRegister(AddressList addressList,
+                                  @RequestParam(value = "checkout") String checkout) {
 
         String addressListCode = addressService.getAddressListCode();
         addressListCode = CodeIndex.codeIndex(addressListCode, 13);
@@ -48,48 +53,50 @@ public class UserAddressController {
         addressList.setAddressList(addressListCode);
         addressList.setBuyerId("buyer01");
         addressService.addressRegister(addressList);
-
-        return "redirect:/user/address/success";
-    }
-
-    @GetMapping("/success")
-    public String successClose() {
-
-        return "user/order/success";
+        if (checkout != null && checkout.equals("checkout")) {
+            return "redirect:/user/address/checkout";
+        }
+        return "redirect:/user/address";
     }
 
     @GetMapping("/modify/{addressList}") // 배송지 수정 클릭 시 값 받아와서 화면에 뿌림
-    @ResponseBody
-    public AddressList getAddressModify(@PathVariable(value = "addressList", required = false) String addressList,
+    public String getAddressModify(@PathVariable(value = "addressList", required = false) String addressList,
                                 Model model) {
         Map<String, String> addressInfo = new HashMap<>();
         addressInfo.put("addressList", addressList);
         AddressList addressLists = addressService.getAddressList(addressInfo).get(0);
-        return addressLists;
+        model.addAttribute("addressLists", addressLists);
+        return "user/order/addressMod";
     }
-
     @PostMapping("/modify")
     public String addressModify(AddressList addressList) {
         addressService.addressModify(addressList);
-        log.info("userAddress.addressList, {}", addressList.getAddressList());
-        return "redirect:/user/address/list";
+        return "redirect:/user/address";
     }
 
-    @GetMapping("/delete/{addressList}")
-    public String getAddressDelete(@PathVariable("addressList") String addressList) {
+    @PostMapping("/delete")
+    @ResponseBody
+    public void addressDelete(@RequestBody String addressList) {
         addressService.addressDelete(addressList);
-        return "redirect:/user/address/list";
     }
 
-    @GetMapping("/checkoutlist") // 체크아웃 화면에서 배송지 등록 시 처리 후 화면에 보여줌
+    @GetMapping("/checkoutlist")
     @ResponseBody
     public AddressList checkoutList(@RequestParam(value = "userId", required = false) String userId) {
-        userId = "buyer01";
         Map<String, String> addressInfo = new HashMap<>();
         addressInfo.put("userId", userId);
         List<AddressList> addressLists = addressService.getAddressList(addressInfo);
-
         return addressLists.get(addressLists.size() - 1);
     }
-  
+
+    @GetMapping("/checkout")
+    public String addressListOnCheckout(Model model) {
+        String userId = "buyer01";
+        Map<String, String> addressInfo = new HashMap<>();
+        addressInfo.put("userId", userId);
+        List<AddressList> addressLists = addressService.getAddressList(addressInfo);
+        model.addAttribute("addressList", addressLists);
+        return "user/order/checkoutAddress";
+    }
+
 }

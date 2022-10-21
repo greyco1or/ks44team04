@@ -1,18 +1,38 @@
 package ks44team04.dto;
 
+import java.util.List;
+
 public class Wishlist {
 
-    private String wishGoods;
+    private String wishCode;
     private String goodsCode;
     private String buyerId;
     private String regDate;
 
-    public String getWishGoods() {
-        return wishGoods;
+	//이미지 리스트 
+	private List<FileDto> fileList;
+	
+    public List<FileDto> getFileList() {
+		return fileList;
+	}
+	public void setFileList(List<FileDto> fileList) {
+		this.fileList = fileList;
+	}
+	
+	private Goods goodsInfo;
+	public Goods getGoodsInfo() {
+		return goodsInfo;
+	}
+	public void setGoodsInfo(Goods goodsInfo) {
+		this.goodsInfo = goodsInfo;
+	}
+	
+    public String getWishCode() {
+        return wishCode;
     }
 
-    public void setWishGoods(String wishGoods) {
-        this.wishGoods = wishGoods;
+    public void setWishCode(String wishCode) {
+        this.wishCode = wishCode;
     }
 
     public String getGoodsCode() {
@@ -42,10 +62,11 @@ public class Wishlist {
     @Override
     public String toString() {
         return "Wishlist{" +
-                "wishGoods='" + wishGoods + '\'' +
+                "wishCode='" + wishCode + '\'' +
                 ", goodsCode='" + goodsCode + '\'' +
                 ", buyerId='" + buyerId + '\'' +
                 ", regDate='" + regDate + '\'' +
+                ", goodsInfo='" + goodsInfo + '\'' +
                 '}';
     }
 }

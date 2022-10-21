@@ -3,18 +3,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="navFragment">
 
-<th:block layout:fragment="customCss">
-	<style>
-		/* 눈누 웹 폰트 */
-		@font-face {
-		    font-family: 'ChosunBg';
-		    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunBg.woff') format('woff');
-		    font-weight: normal;
-		    font-style: normal;
-		}
-	</style>
-</th:block>
-
 <div class="py-1 bg-primary">
     <div class="container">
         <div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
@@ -28,8 +16,23 @@
                         <div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
                         <span class="text">youremail@email.com</span>
                     </div>
-                    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
-                        <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+                    <div class="col-md topper">
+                    	<div class="right">
+                    		<div class="form-inlne">
+	                    		<th:block th:switch="${session.SID}">
+		                       		<li th:case="null">
+				                        <a class="topNavi" th:href="@{/user/user/chooseRight}">회원가입</a><span>&nbsp; | &nbsp;</span>
+				                        <a class="topNavi" th:href="@{/user/user/login}">로그인</a><span>&nbsp; | &nbsp;</span>
+				                        <a class="topNavi" th:href="@{/user/user/login}">마이페이지</a>
+		                       		</li>
+		                      		<li th:case="*">
+	                    				<span th:text="|[${session.SNAME}님]|"></span> &nbsp;
+		                      			<a class="topNavi" th:href="@{/user/user/logout}">로그아웃</a><span>&nbsp; | &nbsp;</span>
+		                      			<a class="topNavi" th:href="@{/user/user/myPage}">마이페이지</a>
+		                      		</li>
+	                    		</th:block>
+                    		</div>
+                    	</div>
                     </div>
                 </div>
             </div>
@@ -42,20 +45,20 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="oi oi-menu"></span> Menu
         </button>
-
         <div class="collapse navbar-collapse" id="ftco-nav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item active"><a th:href="@{/user}" class="nav-link">Home</a></li>
-                <li class="nav-item dropdown">
+            <ul class="navbar-nav ml-auto mr-auto">
+            
+            
+                <li class="nav-item active menus"><a th:href="@{/user}" class="nav-link">Home</a></li>
+                <li class="nav-item dropdown menus">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 12px !important;">상품</a>
                     <div class="dropdown-menu" aria-labelledby="dropdown04">
-                        <a class="dropdown-item" th:href="@{/user/goods/goods}">테슷흐</a>
                         <a class="dropdown-item" th:href="@{/user/goods/goodsList}">상품목록</a>
                         <a class="dropdown-item" th:href="@{/user/goods/wishlist}">관심상품</a>
                         <a class="dropdown-item" th:href="@{/user/checkout}">Checkout</a>
                     </div>
                 </li>
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown menus">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdown06" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 12px !important;">커뮤니티</a>
                     <div class="dropdown-menu" aria-labelledby="dropdown06">
                         <a class="dropdown-item" th:href="@{/user/board/boardFree}">자유게시판</a>
@@ -63,16 +66,29 @@
                         <a class="dropdown-item" th:href="@{/user/board/boardFarm}">농촌체험</a>
                     </div>
                 </li>
-                <li class="nav-item"><a th:href="@{/user}" class="nav-link">ㅇㅇㅇ</a></li>
-                <li class="nav-item dropdown" style="font-family: 'ChosunBg';">
+                <li class="nav-item menus"><a th:href="@{/user}" class="nav-link">ㅇㅇㅇ</a></li>
+                <li class="nav-item dropdown menus" style="font-family: 'ChosunBg';">
  	            	<a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size: 12px !important;"># 고객센터</a>
                     <div class="dropdown-menu" aria-labelledby="dropdown05">
                     	<a class="dropdown-item" th:href="@{/user/regularAsk/regularAskList}"># 자주 묻는 질문</a>
                         <a class="dropdown-item" th:href="@{/user/customerAsk/customerAskList}"># 고객 문의</a>
                     </div>
                 </li>
-
-                <li class="nav-item cta cta-colored"><a th:href="@{/user/goods/cart}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+				<!-- 장부 테그  -->
+				<li class="nav-item menus"><a th:href="@{/user/userledgerBook/userBooks}" class="nav-link">내 장부</a></li>
+				<!-- 장부 테그 끝 -->
+				
+				
+                <li class="nav-item cta cta-colored">
+                	<a th:href="@{/user/wishlist}" class="nav-link rightIcons">
+                		<i class="fi fi-rs-heart" style="font-size:23px; vertical-align:-2px"></i>
+                	</a>
+                </li>
+                <li class="nav-item cta cta-colored">
+                	<a th:href="@{/user/goods/cart}" class="nav-link rightIcons">
+                		<i class="cartUrl fi fi-rr-shopping-cart" style="font-size:23px; vertical-align:-2px"></i>(0)
+                	</a>
+                </li>
             </ul>
         </div>
     </div>

@@ -4,13 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
         
 <mapper namespace="ks44team04.mapper.GoodsMapper">
-	
+
 	<resultMap type="Goods" id="goodsResultMap">
         <id 	column="goods_code" 			property="goodsCode"/>
         <result column="goods_small_category" 	property="goodsSmallCategory"/>
         <result column="seller_id" 				property="sellerId"/>
         <result column="goods_name" 			property="goodsName"/>
         <result column="goods_content" 			property="goodsContent"/>
+        <result column="goods_detail" 			property="goodsDetail"/>
         <result column="goods_price" 			property="goodsPrice"/>
         <result column="goods_discount_rate" 	property="goodsDiscountRate"/>
         <result column="goods_post_price" 		property="goodsPostPrice"/>
@@ -22,17 +23,26 @@
         <result column="reg_date" 				property="regDate"/>
         <result column="modify_date" 			property="modifyDate"/>
         <result column="goods_file" 			property="goodsFile"/>
-        	<association property="userInfo" resultMap="ks44team04.mapper.UserMapper.UserResultMap"/>
-        	<association property="goodsSmallCategoryInfo" resultMap="ks44team04.mapper.CategoryMapper.GoodsSmallCategoryMap"/>
-			<association property="goodsLargeCategoryInfo" resultMap="ks44team04.mapper.CategoryMapper.GoodsLargeCategoryMap"/>
-	        
+       	
+       	<association property="userInfo" resultMap="ks44team04.mapper.UserMapper.UserResultMap"/>
+       	<association property="goodsSmallCategoryInfo" resultMap="ks44team04.mapper.CategoryMapper.GoodsSmallCategoryMap"/>
+		<association property="goodsLargeCategoryInfo" resultMap="ks44team04.mapper.CategoryMapper.GoodsLargeCategoryMap"/>
+		<association property="goodsAnswerInfo" resultMap="ks44team04.mapper.GoodsMapper.goodsAnswerMap"/>
+        
+        <collection property="fileList" javaType="list" ofType="FileDto">
+        	<id 	column="file_idx"				property="fileIdx" />
+        	<result column="file_new_name" 			property="fileNewName" />
+			<result column="file_original_name" 	property="fileOriginalName" />
+			<result column="file_path" 				property="filePath" />
+			<result column="file_size" 				property="fileSize" />
+			<result column="file_islocal" 			property="fileIsLocal" />
+        </collection>
     </resultMap>
-<!--        
-	        
-	        <association property="userInfo" javaType="User">
-	       		<result column="user_id" 				property="userId"/>
-	        </association>
--->	        
+		<!-- <association property="fileInfo" resultMap="ks44team04.mapper.FileMapper.fileResultMap"/> -->
+    
+<!-- 	 <association property="userInfo" javaType="User">
+	        <result column="user_id" 				property="userId"/>
+	     </association> -->	    
     
 	<!-- 상품 목록 조회 -->
 	<select id="getGoodsList" resultMap="goodsResultMap" fetchSize="100" >
@@ -50,7 +60,11 @@
 			,g.stop_sale_check
 			,g.goods_discount_rate
 			,u.user_id
-			,g.reg_date	
+			,g.reg_date
+			,g.goods_file
+			,fc.fc_file_idx
+			,f.file_idx
+			,f.file_path
 		FROM
 			 tb_goods AS g
 			 INNER JOIN
@@ -65,6 +79,14 @@
 			 tb_goods_large_category AS lc
 			 ON
 			 sc.goods_large_category = lc.goods_large_category
+			 INNER JOIN
+			 tb_file_control AS fc
+			 ON
+			 g.goods_file = fc.fc_group_file_idx
+			 INNER JOIN
+			 tb_file AS f
+			 ON
+			 fc.fc_file_idx = f.file_idx
 		ORDER BY g.reg_date DESC;
 	</select>
 	
@@ -99,12 +121,18 @@
 			 tb_goods_large_category AS lc
 			 ON
 			 sc.goods_large_category = lc.goods_large_category
-		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+		<trim prefix="WHERE" prefixOverrides="AND">
 			<if test="searchCate != null and searchCate != ''">
 				sc.goods_small_category = #{searchCate}
 			</if>
 			<if test="searchValue != null and searchValue != ''">
 				AND ${searchKey} LIKE CONCAT('%', #{searchValue}, '%')
+			</if>
+			<if test="firstDate != null and firstDate !='' and lastDate != null and lastDate !=''">
+				AND
+				g.reg_date <![CDATA[>]]> (#{firstDate})
+				AND
+				g.reg_date <![CDATA[<]]> (#{lastDate})
 			</if>
 		</trim>
 		ORDER BY g.reg_date DESC;		 
@@ -114,26 +142,46 @@
 	<select id="getGoodsInfoByCode" parameterType="String" resultMap="goodsResultMap">
 		/* 특정상품 조회 */
 		SELECT
-			 g.goods_code  				
-			,g.goods_small_category		
-			,g.seller_id				AS user_id
+			 gl.goods_large_category
+			,gl.goods_category
+			,gs.goods_small_category
+			,gs.small_category_name
+			,g.goods_code  						
+			,g.seller_id
 			,g.goods_name				
 			,g.goods_content			
+			,g.goods_detail			
 			,g.goods_price				
 			,g.goods_discount_rate		
 			,g.goods_post_price			
-			,g.goods_stock				
+			,g.goods_stock
+			,g.goods_file				
 			,g.soldout_check			
 			,g.stop_sale_check			
 			,g.package_post_check		
 			,g.regular_deliver_check	
-			,g.reg_date					
+			,g.reg_date			
+			,fc.fc_file_idx
+			,f.file_idx
+			,f.file_path
 		FROM
 			tb_goods AS g
 			INNER JOIN
-			tb_user AS u
+			tb_goods_small_category as gs
 			ON
-			g.seller_id = u.user_id
+			g.goods_small_category = gs.goods_small_category
+			INNER JOIN
+			tb_goods_large_category as gl
+			ON
+			gs.goods_large_category = gl.goods_large_category
+			INNER JOIN
+			tb_file_control AS fc
+			ON
+			g.goods_file = fc.fc_group_file_idx
+			INNER JOIN
+			tb_file AS f
+			ON
+			fc.fc_file_idx = f.file_idx
 		WHERE
 			goods_code = #{goodsCode};
 	</select>
@@ -181,16 +229,16 @@
 			<if test="sellerId != null and sellerId != ''">,seller_id = #{sellerId}</if>
 			<if test="goodsName != null and goodsName != ''">,goods_name = #{goodsName}</if>
 			<if test="goodsContent != null and goodsContent != ''">,goods_content = #{goodsContent}</if>
+			<if test="goodsDetail != null and goodsDetail != ''">,goods_detail = #{goodsDetail}</if>
 			<if test="goodsPrice != null and goodsPrice != ''">,goods_price = #{goodsPrice}</if>
-			<if test="goodsDiscountRate != null and goodsDiscountRate != ''">,goods_discount_rate = #{goodsDiscountRate}</if>
-			<if test="goodsPostPrice != null and goodsPostPrice != ''">,goods_post_price = #{goodsPostPrice}</if>
-			<if test="goodsStock != null and goodsStock != ''">,goods_stock = #{goodsStock}</if>
+			,goods_discount_rate = #{goodsDiscountRate}
+			,goods_post_price = #{goodsPostPrice}
+			,goods_stock = #{goodsStock}
 			<if test="soldoutCheck != null and soldoutCheck != ''">,soldout_check = #{soldoutCheck}</if>
 			<if test="stopSaleCheck != null and stopSaleCheck != ''">,stop_sale_check = #{stopSaleCheck}</if>
 			<if test="packagePostCheck != null and packagePostCheck != ''">,package_post_check = #{packagePostCheck}</if>
 			<if test="regularDeliverCheck != null and regularDeliverCheck != ''">,regular_deliver_check = #{regularDeliverCheck}</if>
 			,modify_date = NOW()
-			<if test="goodsReportAmount != null and goodsReportAmount != ''">,goods_report_amount = #{goodsReportAmount}</if>
 			<if test="goodsFile != null and goodsFile != ''">,goods_file = #{goodsFile}</if>
 		</trim>
 		WHERE
@@ -201,9 +249,9 @@
 	<insert id="goodsAdd" parameterType="Goods">
 		/* 상품 등록  */
 		INSERT INTO tb_goods
-			(goods_code, goods_small_category, seller_id, goods_name, goods_content, goods_price, goods_discount_rate, goods_post_price, goods_stock, package_post_check, regular_deliver_check, reg_date, goods_file)
+			(goods_code, goods_small_category, seller_id, goods_name, goods_content, goods_detail, goods_price, goods_discount_rate, goods_post_price, goods_stock, package_post_check, regular_deliver_check, reg_date, goods_file)
 		VALUES
-			(#{goodsCode}, #{goodsSmallCategory}, #{sellerId}, #{goodsName}, #{goodsContent}, #{goodsPrice}, #{goodsDiscountRate}, #{goodsPostPrice}, #{goodsStock}, #{packagePostCheck}, #{regularDeliverCheck}, NOW(), #{goodsFile})
+			(#{goodsCode}, #{goodsSmallCategory}, #{sellerId}, #{goodsName}, #{goodsContent}, #{goodsDetail}, #{goodsPrice}, #{goodsDiscountRate}, #{goodsPostPrice}, #{goodsStock}, #{packagePostCheck}, #{regularDeliverCheck}, NOW(), #{goodsFile})
 	</insert>
 	
 	<!-- 마지막 상품코드 (코드증가) -->
@@ -227,6 +275,9 @@
 		FROM 	tb_user 	as u
 		WHERE	u.user_id = 'admin01';
     </select>
+    
+    
+    <!-- ************************************문의 시작****************************************** -->
 	
     <resultMap type="GoodsQna" id="goodsQnaMap">
         <id 	column="goods_qna_num" 		property="goodsQnaNum"/>
@@ -235,7 +286,8 @@
         <result column="buyer_id" 			property="buyerId"/>
         <result column="goods_qna_title" 	property="goodsQnaTitle"/>
         <result column="goods_qna_content" 	property="goodsQnaContent"/>
-        <result column="goods_qna_date" 	property="goodsQnaDate"/>
+        <result column="reg_date" 			property="regDate"/>
+        <result column="modify_date" 		property="modifyDate"/>
         <result column="secret_check" 		property="secretCheck"/>
         <result column="goods_qna_pw" 		property="goodsQnaPw"/>
         <result column="qna_status" 		property="qnaStatus"/>
@@ -249,20 +301,7 @@
     <select id="getGoodsQna"  parameterType="map" resultMap="goodsQnaMap" fetchSize="100" >
 		/* 상품 문의 조회 */
 		SELECT
-			 q.goods_qna_num
-			,qc.category_name
-			,g.goods_code
-			,g.goods_name
-			,q.goods_qna_title
-			,q.goods_qna_content
-			,q.secret_check
-			,q.goods_qna_pw
-			,q.goods_qna_date
-			,u.user_id
-			,q.qna_status
-			,qa.seller_id
-			,qa.goods_answer_content
-			,qa.answer_date
+			*
 		FROM
 			tb_goods_qna AS q
 			INNER JOIN
@@ -281,27 +320,14 @@
 			tb_user AS u
 			ON
 			q.buyer_id = u.user_id
-		ORDER BY q.goods_qna_date DESC;
+		ORDER BY q.reg_date DESC;
 	</select>
 	
     <!-- 상품 문의 검색 -->
     <select id="getGoodsQnaSearch"  parameterType="map" resultMap="goodsQnaMap" fetchSize="100" >
 		/* 상품 문의 검색 */
 		SELECT
-			 q.goods_qna_num
-			,qc.category_name
-			,g.goods_code
-			,g.goods_name
-			,q.goods_qna_title
-			,q.goods_qna_content
-			,q.secret_check
-			,q.goods_qna_pw
-			,q.goods_qna_date
-			,u.user_id
-			,q.qna_status
-			,qa.seller_id
-			,qa.goods_answer_content
-			,qa.answer_date
+			 *
 		FROM
 			tb_goods_qna AS q
 			INNER JOIN
@@ -320,35 +346,28 @@
 			tb_user AS u
 			ON
 			q.buyer_id = u.user_id
-		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+		<trim prefix="WHERE" prefixOverrides="AND">
 			<if test="searchQnaStatus != null and searchQnaStatus != ''">
 				${searchKey2} = #{searchQnaStatus}
 			</if>
 			<if test="searchValue != null and searchValue != ''">
 				AND ${searchKey} LIKE CONCAT('%', #{searchValue}, '%')
 			</if>
+			<if test="firstDate != null and firstDate !='' and lastDate != null and lastDate !=''">
+				AND
+				q.goods_qna_date <![CDATA[>]]> (#{firstDate})
+				AND
+				q.goods_qna_date <![CDATA[<]]> (#{lastDate})
+			</if>
 		</trim>
-		ORDER BY q.goods_qna_date DESC;
+		ORDER BY q.reg_date DESC;
 	</select>
 	
 	<!-- 특정상품 문의 조회 -->
     <select id="getGoodsQnaInfoByCode"  parameterType="map" resultMap="goodsQnaMap" fetchSize="100" >
 		/* 상품 문의 조회 */
 		SELECT
-			 q.goods_qna_num
-			,qc.category_name
-			,g.goods_code
-			,g.goods_name
-			,q.goods_qna_title
-			,q.goods_qna_content
-			,q.secret_check
-			,q.goods_qna_pw
-			,q.goods_qna_date
-			,u.user_id
-			,q.qna_status
-			,qa.seller_id
-			,qa.goods_answer_content
-			,qa.answer_date
+			*
 		FROM
 			tb_goods_qna AS q
 			INNER JOIN
@@ -369,7 +388,30 @@
 			q.buyer_id = u.user_id
 		WHERE
 			g.goods_code = #{goodsCode}
-		ORDER BY q.goods_qna_date DESC;
+		ORDER BY q.reg_date DESC;
+	</select>
+	
+	<!-- 수정을 위한 특정 문의 조회 -->
+    <select id="qnaInfoByNum"  parameterType="map" resultMap="goodsQnaMap" fetchSize="100" >
+	/* 수정을 위한 특정 문의 조회 */
+	SELECT
+		*
+	FROM
+		tb_goods_qna AS q
+		INNER JOIN
+		tb_goods_qna_category AS qc
+		ON
+		q.goods_qna_category = qc.goods_qna_category
+		INNER JOIN
+		tb_goods AS g
+		ON
+		q.goods_code = g.goods_code
+		LEFT JOIN
+		tb_goods_qna_answer AS qa
+		ON
+		q.goods_qna_num = qa.goods_qna_num
+	WHERE
+		q.goods_qna_num = #{goodsQnaNum}
 	</select>
 	
 	<resultMap type="GoodsQnaCategory" 			id="GoodsQnaCategoryMap">
@@ -394,27 +436,42 @@
 	<insert id="goodsQnaAdd" parameterType="GoodsQna">
 		/* 상품 문의 등록  */
 		INSERT INTO tb_goods_qna
-			(goods_qna_num, goods_code, goods_qna_category, buyer_id, goods_qna_title, goods_qna_content, goods_qna_date, secret_check, goods_qna_pw, qna_status)
+			(goods_qna_num, goods_code, goods_qna_category, buyer_id, goods_qna_title, goods_qna_content, reg_date, secret_check, goods_qna_pw)
 		VALUES
-			(0, #{goodsCode}, #{goodsQnaCategory}, #{buyerId}, #{goodsQnaTitle}, #{goodsQnaContent}, NOW(), #{secretCheck}, #{goodsQnaPw}, #{qnaStatus})
+			(0, #{goodsCode}, #{goodsQnaCategory}, #{buyerId}, #{goodsQnaTitle}, #{goodsQnaContent}, NOW(), #{secretCheck}, #{goodsQnaPw})
 	</insert>
+	
+	<!-- 문의 수정 -->
+	<update id="qnaModify" parameterType="Goods">
+	/* 문의 수정 */
+	UPDATE tb_goods_qna
+	<trim prefix="SET" prefixOverrides=",">
+		<if test="goodsCode != null and goodsCode != ''">,goods_code = #{goodsCode}</if>
+		<if test="goodsQnaCategory != null and goodsQnaCategory != ''">,goods_qna_category = #{goodsQnaCategory}</if>
+		<if test="goodsQnaTitle != null and goodsQnaTitle != ''">,goods_qna_title = #{goodsQnaTitle}</if>
+		<if test="goodsQnaContent != null and goodsQnaContent != ''">,goods_qna_content = #{goodsQnaContent}</if>
+		<if test="secretCheck != null and secretCheck != ''">,secret_check = #{secretCheck}</if>
+		<if test="goodsQnaPw != null and goodsQnaPw != ''">,goods_qna_pw = #{goodsQnaPw}</if>
+		<if test="qnaStatus != null and qnaStatus != ''">,qna_status = #{qnaStatus}</if>
+		,modify_date = NOW()
+	</trim>
+	WHERE
+		goods_qna_num = #{goodsQnaNum};
+	</update>
 
- 	<resultMap 	type="GoodsAnswer" 				id="goodsAnswerMap">
-        <id 	column="goods_qna_answer" 		property="goodsQnaAnswer"/>
+ 	<resultMap 	type="GoodsQnaAnswer" 				id="goodsAnswerMap">
+        <id 	column="goods_answer_code" 		property="goodsAnswerCode"/>
         <result column="goods_qna_num" 			property="goodsQnaNum"/>
         <result column="seller_id" 				property="sellerId"/>
         <result column="goods_answer_content" 	property="goodsAnswerContent"/>
-        <result column="answer_date" 			property="answerDate"/>
+        <result column="reg_date" 				property="regDate"/>
+        <result column="modify_date" 			property="modifyDate"/>
 	</resultMap>
     
-   	<!-- 상품 답변 조회  --> 
+   	<!-- 문의 답변 조회  --> 
     <select id="getGoodsAnswer" resultMap="goodsAnswerMap" fetchSize="100">
     SELECT
-		 qa.goods_qna_answer
-		,gq.goods_qna_num
-		,qa.seller_id
-		,qa.goods_answer_content
-		,qa.answer_date
+		 *
 	FROM
 		tb_goods_qna_answer AS qa
 		INNER JOIN
@@ -422,5 +479,146 @@
 		ON
 		qa.goods_qna_num = gq.goods_qna_num;
     </select> 
+    
+   	<!-- 문의 답변 등록  --> 
+    <insert id="answerAdd" parameterType="GoodsQnaAnswer">
+		/* 상품 문의 등록  */
+		INSERT INTO tb_goods_qna_answer
+			(goods_answer_code, goods_qna_num, seller_id, goods_answer_content, reg_date)
+		VALUES
+			(#{goodsAnswerCode}, #{goodsQnaNum}, #{sellerId}, #{goodsAnswerContent}, NOW())
+	</insert>
+	
+	<!-- 마지막 답변코드 (코드증가) -->
+	<select id="getAnswerNewCode" parameterType="String" resultType="String">
+		SELECT  MAX(goods_answer_code)
+		FROM 	tb_goods_qna_answer
+		WHERE   seller_id = #{SellerId};
+    </select>
+    
+	<!-- 문의 답변 시 문의상태 '답변완료'로 변경 -->
+	<update id="statusUpdate" parameterType="int">
+	/* 문의 답변 시 문의상태 '답변완료'로 변경 */
+	UPDATE 
+		tb_goods_qna AS gq
+	SET
+		gq.qna_status = '답변완료'
+	WHERE
+		gq.goods_qna_num = #{goodsQnaNum};
+	</update>
+    
+    <!-- 문의 답변 수정 -->
+	<update id="answerModify" parameterType="GoodsQnaAnswer">
+	/* 문의 답변 수정 */
+	UPDATE tb_goods_qna_answer
+	<trim prefix="SET" prefixOverrides=",">
+		<if test="goodsAnswerContent != null and goodsAnswerContent != ''">,goods_answer_content = #{goodsAnswerContent}</if>
+		,modify_date = NOW()
+	</trim>
+	WHERE
+		goods_answer_code = #{goodsAnswerCode};
+	</update>
+	
+	<!-- 수정을 위한 특정 답변 조회 -->
+    <select id="answerInfoByCode"  parameterType="map" resultMap="goodsAnswerMap" fetchSize="100" >
+	/* 수정을 위한 특정 문의 조회 */
+	SELECT
+		*
+	FROM
+		tb_goods_qna_answer
+	WHERE
+		goods_answer_code = #{goodsAnswerCode};
+	</select>
+    
+    <!-- 유저 권한 쿼리
+    <select id="userRight" parameterType="String" resultType="string">
+	SELECT
+		u.user_right
+	FROM
+		tb_user AS u
+	WHERE
+		u.user_id = #{userId};	
+    </select> -->
+    
+    <!-- 문의 한 유저만 열람 가능 쿼리
+    <select id="qnaBuyerView" parameterType="int" resultType="string" fetchSize="100">
+	SELECT
+		buyer_id
+	FROM
+		tb_goods_qna AS gq
+	WHERE
+		gq.goods_qna_num = #{goodsQnaNum};
+	</select> -->
+	
+	<!-- 해당 상품 판매자 문의 열람 가능 쿼리
+    <select id="qnaSellerView" parameterType="int" resultType="string" fetchSize="100">
+	SELECT
+		seller_id
+	FROM
+		tb_goods AS g
+		INNER JOIN
+		tb_goods_qna AS gq
+		ON
+		g.goods_code = gq.goods_code
+	WHERE
+		gq.goods_qna_num = #{goodsQnaNum};
+    </select> -->
+    
+    <!-- ************************************후기 시작************************************ -->
+      <!-- 후기 리소스맵  -->
+    <resultMap type="Review" id="reviewListResultMap">
+		<id     column="review_list"  			property="reviewList"/>
+		<result column="goods_list" 			property="goodsList"/>
+		<result column="buyer_id" 				property="buyerId"/>
+		<result column="order_detail_code" 		property="orderDetailCode"/>
+		<result column="review_content"  		property="reviewContent"/>
+		<result column="review_img" 			property="reviewImg"/>
+		<result column="review_reg_date" 		property="reviewRegDate"/>
+		<result column="review_update_date" 	property="reviewUpdateDate"/>
+		<result column="save_point" 			property="savePoint"/>
+		<result column="like_amount" 			property="likeAmount"/>
+		<result column="grade" 					property="grade"/>
+	</resultMap>
+	
+  
+    <!-- 후기 목록  -->
+    <select id="reviewList" resultMap="reviewListResultMap">
+	/* 후기 목록 */
+	SELECT 
+		r.review_list
+		,r.goods_list
+		,r.buyer_id
+		,r.order_detail_code
+		,r.review_content
+		,r.review_img
+		,r.review_reg_date
+		,r.review_update_date
+		,r.save_point
+		,r.like_amount
+		,r.grade
+	FROM 
+		tb_review AS r 
+	
+	</select>
+	
+	<!-- 후기 특정 목록  -->
+	<select id="reviewSpecific" resultMap="reviewListResultMap">
+		SELECT 
+			r.review_list
+			,r.goods_list
+			,r.buyer_id
+			,r.order_detail_code
+			,r.review_content
+			,r.review_img
+			,r.review_reg_date
+			,r.review_update_date
+			,r.save_point
+			,r.like_amount
+			,r.grade
+		FROM 
+			tb_review AS r 
+		WHERE 
+			r.goods_list = #{goodsList}
+	</select>
     
 </mapper>

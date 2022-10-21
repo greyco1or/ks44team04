@@ -54,6 +54,12 @@ public class CouponService {
 
 	}
 
+	// 쿠폰발급
+	public void couponIssue(CouponStatus couponStatus){
+
+		couponMapper.couponIssue(couponStatus);
+	}
+
 	// 쿠폰보유현황
 	public List<CouponStatus> couponStatus() {
 
@@ -73,6 +79,10 @@ public class CouponService {
 
 	public List<CouponStatus> getCouponStatus(String userId) {
 		return couponMapper.getCouponStatus(userId);
+	}
+
+	public void deleteCouponStatus(String couponStatusCode) {
+		couponMapper.deleteCouponStatus(couponStatusCode);
 	}
 
 }

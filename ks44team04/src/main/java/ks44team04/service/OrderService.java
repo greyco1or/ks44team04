@@ -45,11 +45,21 @@ public class OrderService {
         orderMapper.setOrderDetailStatus(orderDetailCode, orderStatus);
     }
 
+    /* 페이징 테스트 시작 */
+    public int getContentsCount() {
+        return orderMapper.getContentsCount();
+    }
+    public List<OrderDetail> getOrderListTest(Paging paging) {
+        return orderMapper.getOrderListTest(paging);
+    }
+
+    /* 페이징 테스트 끝 */
+
     public List<OrderDetail> getOrderList(String userId) {
         return orderMapper.getOrderList(userId);
     }
-    public List<OrderDetail> getOrderListA(String sellerId, String status) {
-        return orderMapper.getOrderListA(sellerId, status);
+    public List<OrderDetail> getOrderListA(Map<String, String> orderMap) {
+        return orderMapper.getOrderListA(orderMap);
     }
 
     public Goods getGoodsInfo(String goodsCode) {
@@ -66,5 +76,24 @@ public class OrderService {
 
     public void setOrderDetail(OrderDetail orderDetail) {
         orderMapper.setOrderDetail(orderDetail);
+    }
+
+    public String addPostInfo(PostInfo postInfo) {
+        orderMapper.addPostInfo(postInfo);
+        return postInfo.getPostInfo();
+    }
+
+    public void setOrderDetailPost(String orderDetailCode, String postInfo) {
+        orderMapper.setOrderDetailPost(orderDetailCode, postInfo);
+    }
+
+    public void setCancelApprove(String orderDetailCode) {
+        orderMapper.setCancelApprove(orderDetailCode);
+    }
+    public void setExchangeApprove(Map<String, String> info) {
+        orderMapper.setExchangeApprove(info);
+    }
+    public void setReturnApprove(String orderDetailCode) {
+        orderMapper.setReturnApprove(orderDetailCode);
     }
 }

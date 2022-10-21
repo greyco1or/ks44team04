@@ -8,11 +8,14 @@ import ks44team04.dto.Leave;
 import ks44team04.dto.LevelBuyerCategory;
 import ks44team04.dto.LevelSellerCategory;
 import ks44team04.dto.Login;
+import ks44team04.dto.PaymentTotal;
 import ks44team04.dto.Right;
+import ks44team04.dto.Search;
 import ks44team04.dto.Seller;
 import ks44team04.dto.User;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UserService {
-	
-	
-	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserMapper userMapper;
     
@@ -33,14 +34,140 @@ public class UserService {
         this.userMapper = userMapper;
     }
     
+    
+    /* =============== 검색 시작 =============== */
+    //판매자 검색
+	public List<Seller> searchSellerList(Map<String, Object> searchMap) {
+		List<Seller> sellerList = userMapper.searchSellerList(searchMap);
+		return sellerList;
+	}
+    
+    //회원검색
+	public List<User> searchUserList(Search search) {
+		List<User> userList = userMapper.searchUserList(search);
+		if(userList != null) {
+			for(User user : userList) {
+				
+				String userLevel = user.getUserLevel();
+				
+				if(userLevel != null) {
+					String lvName = userLevel.substring(userLevel.length() - 2);
+					
+					if(userLevel.contains("Buyer")) {
+						if(lvName.equals("01")) {
+							user.setUserLevelName("씨앗");
+						}else if(lvName.equals("02")) {
+							user.setUserLevelName("새싹");
+						}else if(lvName.equals("03")) {
+							user.setUserLevelName("잎새");
+						}else if(lvName.equals("04")) {
+							user.setUserLevelName("열매");
+						}
+					}else if(userLevel.contains("Seller")) {
+						if(lvName.equals("01")) {
+							user.setUserLevelName("물방울");
+						}else if(lvName.equals("02")) {
+							user.setUserLevelName("시냇물");
+						}else if(lvName.equals("03")) {
+							user.setUserLevelName("호수");
+						}else if(lvName.equals("04")) {
+							user.setUserLevelName("강");
+						}
+					}
+				}else {
+				user.setUserLevelName("-");
+			}
+			log.info("user.getUserLevelName(), {}", user.getUserLevelName());
+			}
+		}
+		return userList;
+	}
+    /* =============== 검색 끝 =============== */
+    
+    
+    /* =============== 휴면 시작 =============== */
+    //(휴면해제2) 휴면해제 클릭시 휴면 테이블 '휴면해제'
+    public void dormantToNormal2(String loginId) {
+    	userMapper.dormantToNormal2(loginId);
+    }
+    
+	//(휴면해제1) 휴면해제 클릭시 회원상태 '정상'
+	public void dormantToNormal1(String userId) {
+		userMapper.dormantToNormal1(userId);
+	}
+	
+	//(휴면처리3) 휴면 테이블에 insert
+	public void insertDormant(String userId) {
+		userMapper.insertDormant(userId);
+	}
+	
+	//(휴면처리2) 회원상태 '휴면'으로
+	public void normalToDormant(String userId) {
+		userMapper.normalToDormant(userId);
+	}
+	
+	//(휴면처리1) 휴면 대상 아이디 목록
+	public List<String> getDormantId() {
+		return userMapper.getDormantId();
+	}
+	/* =============== 휴면 끝 =============== */
+	
+	
+	/* =============== 탈퇴 시작 =============== */
+    //10/13 회원 탈퇴
+  	public int removeUser(String userId, String userRight, String userInfoKeep) {
+  		
+  		int resultRemove = 0;
+  		
+  		if(userInfoKeep.equals("탈퇴시까지")) {
+  			// 권한별 삭제 
+  			// 구매자
+  			if(userRight.equals("buyer") || userRight.equals("seller_before")) {
+  				resultRemove += userMapper.removeBuyerTotal(userId);
+  				resultRemove += userMapper.removeBuyerLevelStatus(userId);
+  				resultRemove += userMapper.removeCart(userId);
+  				resultRemove += userMapper.removeWishlist(userId);
+  				resultRemove += userMapper.removeAutoPayment(userId);
+  				resultRemove += userMapper.updateRegularPostStatus(userId);
+  				resultRemove += userMapper.removeAlertSend(userId);
+  				resultRemove += userMapper.removeCouponStatus(userId);
+  				resultRemove += userMapper.removeAddressList(userId);
+  			}
+  			// 판매자
+  			if(userRight.equals("seller")) {
+  				resultRemove += userMapper.removeSellerInfo(userId);
+  				resultRemove += userMapper.removeSellerTotal(userId);
+  				resultRemove += userMapper.removeSellerLevelStatus(userId);
+  				resultRemove += userMapper.updateGoodsSaleCheck(userId);
+  			}
+  			// 공통 (1. 로그인이력 삭제 / 2. 회원 삭제 / 3. 탈퇴 테이블에 추가)
+  			resultRemove += userMapper.moveToLeaveAtOnce(userId);
+  			resultRemove += userMapper.removeLoginHistory(userId);
+  			resultRemove += userMapper.removeUserInfo(userId);
+  		}else {
+  			//정보보관기간 1년 - userStatus '탈퇴'로 변경
+  			resultRemove += userMapper.updateLeaveUserStatus(userId);
+  			resultRemove += userMapper.moveToLeave1year(userId);
+  		}
+  		return resultRemove;
+  	}
+  	
+  	// 10/13 회원 탈퇴를 위한 관리자 비밀번호
+  	public String getAdminPw(String userPw) {
+  		String adminPw = userMapper.getAdminPw(userPw);
+  		return adminPw;
+  	}
+  	/* =============== 탈퇴 끝 =============== */
+  	
+    
     // 10/11 판매자 신청 승인 (seller 테이블)
-    public void approveSeller(Seller seller) {
-    	userMapper.approveSeller(seller);
+    public void approveSeller(String sellerId, String approveId) {
+    	userMapper.approveSeller(sellerId, approveId);
     }
     
 	// 10/11 판매자 신청 승인 (user 테이블)
-	public void approveSellerRight(User user) {
-		userMapper.approveSellerRight(user);
+	public void approveSellerRight(String userId) {
+		userMapper.approveSellerRight(userId);
 	}
     
     // 10/11 이미 신청한 회원 판매자 등록 막기 (userId, sellerId 비교)
@@ -118,7 +245,12 @@ public class UserService {
     	System.out.println("회원가입 결과:" + addUserResult);
     }
     
-	//회원수정
+    //판매자 정보 수정
+    public void modifySeller(Seller seller) {
+    	userMapper.modifySeller(seller);
+    }
+    
+	//회원 정보 수정
 	public void modifyUser(User user) {
 		userMapper.modifyUser(user);
 	}
@@ -238,7 +370,6 @@ public class UserService {
 							user.setUserLevelName("강");
 						}
 					}
-				
 				}else {
 				user.setUserLevelName("-");
 			}

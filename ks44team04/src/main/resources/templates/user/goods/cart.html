@@ -2,161 +2,356 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/userDefault}">
+<th:block layout:fragment="customCss">
+<!-- 폰트 -->
+<link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
+<!-- 장바구니 상품 삭제 아이콘 -->
+<link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+<style>
+* { font-family: 'Spoqa Han Sans Neo', 'sans-serif'; color: #333;}
+/* 전체 선택 checkbox css */
+.cartCheck { position: relative; top: 1.5px; width: 18px; height: 18px;  border: 1px solid #d3d3d3; border-radius: 50%; appearance: none; cursor: pointer; transition: background 0.2s; }
+.cartCheck:checked { background: #b3d97a; border: 1px solid #a1da4c; }
 
-<th:block layout:fragment="customContents">
+/* plus minus 버튼 */
+.plusMinusBtn { width:35px; height:35px; border:1px; border-radius: 50%; background-color:#f1f1f1;
+		   	    font-size: 25px; font-weight:bold; line-height: 20px; }
+button:focus{ outline:none; border:none; }
 
-    <div th:replace="/fragments/userHeader :: headerFragment"></div>
-
-    <section class="ftco-section ftco-cart">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 ftco-animate">
-                    <div class="cart-list">
-                        <table class="table">
-                            <thead class="thead-primary">
-                            <tr class="text-center">
-                                <th>&nbsp;</th>
-                                <th>&nbsp;</th>
-                                <th>Product name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr class="text-center">
-                                <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
-
-                                <td class="image-prod">
-                                    <div class="img" style="background-image:url(images/product-3.jpg);"></div>
-                                </td>
-
-                                <td class="product-name">
-                                    <h3>Bell Pepper</h3>
-                                    <p>Far far away, behind the word mountains, far from the countries</p>
-                                </td>
-
-                                <td class="price">$4.90</td>
-
-                                <td class="quantity">
-                                    <div class="input-group mb-3">
-                                        <input type="text" name="quantity" class="quantity form-control input-number"
-                                               value="1" min="1" max="100">
-                                    </div>
-                                </td>
-
-                                <td class="total">$4.90</td>
-                            </tr><!-- END TR-->
-
-                            <tr class="text-center">
-                                <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
-
-                                <td class="image-prod">
-                                    <div class="img" style="background-image:url(images/product-4.jpg);"></div>
-                                </td>
-
-                                <td class="product-name">
-                                    <h3>Bell Pepper</h3>
-                                    <p>Far far away, behind the word mountains, far from the countries</p>
-                                </td>
-
-                                <td class="price">$15.70</td>
-
-                                <td class="quantity">
-                                    <div class="input-group mb-3">
-                                        <input type="text" name="quantity" class="quantity form-control input-number"
-                                               value="1" min="1" max="100">
-                                    </div>
-                                </td>
-
-                                <td class="total">$15.70</td>
-                            </tr><!-- END TR-->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-end">
-                <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-                    <div class="cart-total mb-3">
-                        <h3>Coupon Code</h3>
-                        <p>Enter your coupon code if you have one</p>
-                        <form action="#" class="info">
-                            <div class="form-group">
-                                <label for="">Coupon code</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                        </form>
-                    </div>
-                    <p><a href="checkout.html" class="btn btn-primary py-3 px-4">Apply Coupon</a></p>
-                </div>
-                <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-                    <div class="cart-total mb-3">
-                        <h3>Estimate shipping and tax</h3>
-                        <p>Enter your destination to get a shipping estimate</p>
-                        <form action="#" class="info">
-                            <div class="form-group">
-                                <label for="">Country</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                            <div class="form-group">
-                                <label for="country">State/Province</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                            <div class="form-group">
-                                <label for="country">Zip/Postal Code</label>
-                                <input type="text" class="form-control text-left px-3" placeholder="">
-                            </div>
-                        </form>
-                    </div>
-                    <p><a href="checkout.html" class="btn btn-primary py-3 px-4">Estimate</a></p>
-                </div>
-                <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-                    <div class="cart-total mb-3">
-                        <h3>Cart Totals</h3>
-                        <p class="d-flex">
-                            <span>Subtotal</span>
-                            <span>$20.60</span>
-                        </p>
-                        <p class="d-flex">
-                            <span>Delivery</span>
-                            <span>$0.00</span>
-                        </p>
-                        <p class="d-flex">
-                            <span>Discount</span>
-                            <span>$3.00</span>
-                        </p>
-                        <hr>
-                        <p class="d-flex total-price">
-                            <span>Total</span>
-                            <span>$17.60</span>
-                        </p>
-                    </div>
-                    <p><a href="checkout.html" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="ftco-section ftco-no-pt ftco-no-pb py-5 bg-light">
-        <div class="container py-4">
-            <div class="row d-flex justify-content-center py-5">
-                <div class="col-md-6">
-                    <h2 style="font-size: 22px;" class="mb-0">Subcribe to our Newsletter</h2>
-                    <span>Get e-mail updates about our latest shops and special offers</span>
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <form action="#" class="subscribe-form">
-                        <div class="form-group d-flex">
-                            <input type="text" class="form-control" placeholder="Enter email address">
-                            <input type="submit" value="Subscribe" class="submit px-3">
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
+</style>
 </th:block>
 
+<th:block layout:fragment="customContents">
+<section class="ftco-section" style="padding:2em 0;">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="text-center">
+				<div style="font-size:25px; margin-bottom:15px;">장바구니</div>
+            </div>
+        </div>
+
+        <!-- 전체선택, 선택삭제 칸 -->
+		<div class="row" >
+			<div class="col-md-8">
+				<div style="font-size:17px; margin-bottom:-10px;">
+					<input type="checkbox" class="cartCheck" id="allCheck" style="margin-right:5px;" ><label for="allCheck" style="cursor:pointer;">전체선택</label>
+						<span style="color:gray;">&nbsp;&nbsp;|</span>
+						<button class="selectDel" style="border:none; background-color:rgba(0,0,0,0); outline: none; cursor:pointer;">선택삭제</button>
+				</div>
+			<hr>
+
+				<!-- 장바구니 리스트 불러오기 -->
+			<div  id="cartList" >
+				<div th:if="${not #lists.isEmpty(cartList)}" th:each="c : ${cartList}">
+					<div class="cartAll form-inline" style="width:100%;">
+						<input type="checkbox" class="cartCheck oneCheck" id="oneCheck" name="cartCheck" th:data-cart-code="${c.cartCode}" style="margin-right:15px;">
+							<input type="hidden" class="cartCode" th:value="${c.cartCode}">
+							<input type="hidden" class="goodsCode" th:value="${c.goodsInfo.goodsCode}">
+							<a th:href="@{/user/goods/goods(goodsCode=${c.goodsInfo.goodsCode})}">
+								<img th:src="@{'/' + ${c.fileList[0].filePath}}" style="width:85px; height:85px; border-radius:5px;">
+							</a>
+							<a th:href="@{/user/goods/goods(goodsCode=${c.goodsInfo.goodsCode})}" style="margin:auto; font-size:18px; font-weight: 500; line-height:22px; color:#333; margin-left: 10px; vertical-align:middle;">
+								<span th:text="${c.goodsInfo.goodsName}"></span>
+							</a>
+						<div class="form-inline form-group">
+							<div class="plusMiusDiv input-group" style="width: 150px; float:right;">
+								<button type="button" class="plusMinusBtn minusBtn" th:value="${c.cartCode}">-</button>&nbsp;
+									<input type="text" th:value="${c.cartAmount}" name="cartAmount" class="cartAmount form-control" style="size:10px; height:35px !important; text-align:center; border-color:#f1f1f1;">&nbsp;
+									<input type="hidden" id="goodsStock" th:value="${c.goodsInfo.goodsStock}">
+								<button type="button" class="plusMinusBtn plusBtn" th:value="${c.cartCode}">+</button>
+							</div>
+							<div style="margin-top:10px;">
+								<div class="totalPrice" th:text="${#numbers.formatInteger((c.cartAmount*(c.goodsInfo.goodsPrice-c.goodsInfo.goodsPrice*c.goodsInfo.goodsDiscountRate/100)),3,'COMMA') + '원'}" style="font-weight:600; font-size:18px; width:120px; text-align:right;">
+								</div>
+									<input type="hidden" class="hiddenPrice">
+									<input type="hidden" class="hiddenPrice2">
+									<input type="hidden" class="goodsPrice" th:value="${c.goodsInfo.goodsPrice}">
+								<div class="totalPrice2" th:text="${#numbers.formatInteger(c.cartAmount*(c.goodsInfo.goodsPrice),3,'COMMA')+'원'}" style="font-weight:400; font-size:14px; color:#767676; float:right; text-decoration: line-through; margin-top:-12px;">
+								</div>
+									<input type="hidden" class="goodsDiscountRate" th:value="${c.goodsInfo.goodsDiscountRate}">
+									<input type="hidden" class="goodsPostPrice" th:value="${c.goodsInfo.goodsPostPrice}">
+							</div>
+							<a href="#" class="cartRemove" th:data-cart-code="${c.cartCode}" style="margin-left:10px;">
+							<i class="fi fi-br-cross" style="font-size:14px; color:#d3d3d3; width:35px; margin-top:3px;"></i></a>
+						</div>
+					</div>
+					<div>
+						<hr style="border-style: dashed; margin-top:20px; margin-bottom:20px;">
+					</div>
+				</div>
+				<div th:unless="${not #lists.isEmpty(cartList)}">
+					<div style="padding : 130px 0; text-align:center; color:#979797;">장바구니에 담긴 상품이 없습니다.</div>
+				</div>
+			</div>
+		</div>
+
+			<!-- 결제금액 계산 -->
+			<div class="col-md-4" th:object="${cartList}" style="margin-top:45px; padding-right:40px;">
+				<div style="border:1px solid #e5e5e5; width:100%; height:235px;">
+					<div style="padding:25px 35px 25px 35px; margin-bottom:-15px; width:100%; height:100%;">
+						<div>
+							<span style="font-size:17px;">상품금액</span>
+							<span style="font-size:17px; float:right;" class="checkPrice">0원</span>
+						</div>
+						<div>
+							<span style="font-size:17px;">할인금액</span>
+							<span style="font-size:17px; float:right;" class="checkDiscount">0원</span>
+						</div>
+						<div>
+							<span style="font-size:17px;">배송비</span>
+							<span style="font-size:17px; float:right;" class="checkPost">0원</span>
+						</div>
+						<hr>
+						<div>
+							<span style="font-size:17px;">주문금액</span>
+							<span style="font-size:17px; float:right;" class="checkTotal">0원</span>
+						</div>
+						<div style="float:right; margin-top:5px;">
+							<span class="badge" style="background-color:#d1ebab;">적립</span>
+							<span style="font-size:13px; vertical-align:text-top;">0원 적립</span>
+							<span style="font-size:11px; color:#939393;">씨앗등급 0.5%</span>
+						</div>
+					</div>
+				</div>
+				<div style="padding-top:10px;">
+					<button id="checkoutBtn" style="cursor:pointer; width:100%; height:70px; border:none; background-color:#d1ebab; font-size:20px; font-weight:500;">주문하기</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr style="width: 80%; text-align:left; margin: auto; margin-top:50px; margin-bottom:50px;">
+</section>
+	<form id="checkoutForm" th:action="@{/user/order/checkout}" method="get"></form>
+
+</th:block>
+<th:block layout:fragment="customJsScript">
+<th:block th:replace="fragments/userJs :: datatablesFragment"></th:block>
+<script th:inline="javascript">
+
+$(document).ready(function() {
+
+	/* 전체 선택 클릭 시 장바구니 안에 있는 상품 다 전체 선택 */
+	$('#allCheck').click(function() {
+		if($('#allCheck').is(':checked')) $('input[id=oneCheck]').prop('checked', true);
+		else $('input[id=oneCheck]').prop('checked', false);
+	});
+
+	$('input[id=oneCheck]').click(function() {
+		var total = $('input[id=oneCheck]').length;
+		var checked = $('input[id=oneCheck]:checked').length;
+
+		if(total != checked) $('.allCheck').prop('checked', false);
+		else $('#allCheck').prop('checked', true);
+	});
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~ 수량 플러스 버튼 ~~~~~~~~~~~~~~~~~~~~~~ */
+	$('.plusBtn').on('click', function(){
+		var goodsPrice = $(this).parent('div').parent('div').find('.goodsPrice').val(); //상품 가격
+		var goodsDiscountRate = $(this).parent('div').parent('div').find('.goodsDiscountRate').val(); //상품 할인율
+		var discounted = goodsPrice * goodsDiscountRate / 100; //상품 할인가
+		var salePrice = goodsPrice - discounted; //상품 정가-할인가 = 할인가격
+		var quantity = $(this).parent('div').find('input[name=cartAmount]').val(); //선택 수량
+		var totalPrice = salePrice * quantity //할인가격 * 선택 수량
+		var cartAmount = $(this).parent('div').find('.cartAmount').val();
+
+		//해당 상품의 재고
+		var goodsStock = $(this).parent('div').find('input[id=goodsStock]').val();
+		console.log('해당 상품 재고: '+goodsStock);
+
+		//버튼 클릭시 수량 +1 되게 하기
+		if(goodsStock > 1){
+			var quantity = $(this).parent('div').find('input[name=cartAmount]').val();
+			$(this).parent('div').find('input[name=cartAmount]').val(++quantity);
+		}
+		//수량이 상품 재고 이상으로 선택 시 최대 수량 알림 메세지
+		if(quantity > goodsStock){
+			$(this).parent('div').find('input[name=cartAmount]').val(cartAmount);
+			alert('최대 수량입니다');
+		}
+		console.log('선택 수량: '+quantity);
+
+		//수량 변경값에 따라 총 금액 변화주기 => if) 수량이 0일 때는 원래 값만 보이게 하고 else) 아닐 때엔 할인가 * 수량
+		if(quantity == '0' && quantity == '1'){
+			$(this).parent('div').parent('div').find('.hiddenPrice').val(quantity+'원');
+		}else{
+			$(this).parent('div').parent('div').find('.hiddenPrice').val(salePrice * quantity);
+			var hiddenPrice = $(this).parent('div').parent('div').find('.hiddenPrice').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			$(this).parent('div').parent('div').find('.totalPrice').text(hiddenPrice+'원');
+			console.log(hiddenPrice);
+
+			$(this).parent('div').parent('div').find('.hiddenPrice2').val(goodsPrice * quantity);
+			var hiddenPrice2 = $(this).parent('div').parent('div').find('.hiddenPrice2').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			$(this).parent('div').parent('div').find('.totalPrice2').text(hiddenPrice2+'원');
+			console.log(hiddenPrice2);
+		}
+	});
+
+	/* ~~~~~~~~~~~~~~~~~~~~~~ 수량 마이너스 버튼 ~~~~~~~~~~~~~~~~~~~~~~ */
+	$('.minusBtn').on('click', function(){
+		var goodsPrice = $(this).parent('div').parent('div').find('.goodsPrice').val(); //상품 가격
+		var goodsDiscountRate = $(this).parent('div').parent('div').find('.goodsDiscountRate').val(); //상품 할인율
+		var discounted = goodsPrice * goodsDiscountRate / 100; //상품 할인가
+		var salePrice = goodsPrice - discounted; //상품 정가-할인가 = 할인가격
+		var quantity = $(this).parent('div').find('input[name=cartAmount]').val(); //선택 수량
+		var totalPrice = salePrice * quantity //할인가격 * 선택 수량
+
+		//해당 상품의 재고
+		var goodsStock = $(this).parent('div').find('input[id=goodsStock]').val();
+		console.log('해당 상품 재고: '+goodsStock);
+
+		//버튼 클릭시 수량 -1 되게 하기
+		var quantity = $(this).parent('div').find('input[name=cartAmount]').val();
+		$(this).parent('div').find('input[name=cartAmount]').val(--quantity);
+
+		//수량 1이하로 될 시 최소 수량 메세지
+		if(quantity <= 0){
+			$(this).parent('div').find('input[name=cartAmount]').val(1);
+			alert('최소 수량입니다');
+		}
+		console.log('선택 수량: '+quantity);
+
+		//수량 변경값에 따라 총 금액 변화주기 => if) 수량이 0일 때는 원래 값만 보이게 하고 else) 아닐 때엔 할인가 * 수량
+		if(quantity == '0'){
+			$(this).parent('div').parent('div').find('.hiddenPrice').val(quantity+'원');
+		}else{
+			$(this).parent('div').parent('div').find('.hiddenPrice').val(salePrice * quantity);
+			var hiddenPrice = $(this).parent('div').parent('div').find('.hiddenPrice').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			$(this).parent('div').parent('div').find('.totalPrice').text(hiddenPrice+'원');
+			console.log(hiddenPrice);
+
+			$(this).parent('div').parent('div').find('.hiddenPrice2').val(goodsPrice * quantity);
+			var hiddenPrice2 = $(this).parent('div').parent('div').find('.hiddenPrice2').val().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			$(this).parent('div').parent('div').find('.totalPrice2').text(hiddenPrice2+'원');
+			console.log(hiddenPrice2);
+		}
+	});
+
+	/* 장바구니 내에서 수량 변경 시 수량 업데이트 */
+	$('.plusMinusBtn').click(function(){
+		var cartAmount = $(this).parent('div').find('.cartAmount').val();
+		console.log(cartAmount);
+		var cartCode = $(this).val();
+		console.log(cartCode);
+
+		$.ajax({ type: "GET",
+       	 		 url: "/user/goods/cartModify",
+      	 		 data: { 'cartAmount' : cartAmount,
+      	 			     'cartCode' : cartCode },
+      	 		 dataType: "text",
+       	 		 success: function (cartAmount) {
+       	 			$(cartAmount).val(cartAmount);
+           		 }
+		});
+	});
+
+	/* 체크된 상품 결제금액 수정 이벤트 */
+	$('#oneCheck, .plusMinusBtn, #allCheck').click(function(){
+		//var parentDiv = $(this).closest('.cartAll');
+
+		var cartPrice = 0;
+		var discountPrice = 0;
+		var postPrice = 0;
+		var totalPrice = 0;
+		$('.oneCheck').each(function(){
+			var parentDiv = $(this).closest('.cartAll')
+			if($(this).is(":checked")){
+				cartPrice += //상품금액 = 장바구니에 담긴 수량  * 상품 가격
+					Number(parentDiv.find('.cartAmount').val()) * Number(parentDiv.find('.goodsPrice').val());
+				discountPrice += //할인금액 = 장바구니에 담긴 수량 * 상품 가격 * 할인율 / 100
+					Number(parentDiv.find('.cartAmount').val()) * Number(parentDiv.find('.goodsPrice').val()) * Number(parentDiv.find('.goodsDiscountRate').val()) / 100 ;
+				postPrice += //배송비 = 체크된 해당 상품 배송비
+					Number(parentDiv.find('.goodsPostPrice').val());
+				totalPrice = //결제금액 = 상품금액 - 할인금액 + 배송비
+					cartPrice - discountPrice + postPrice
+			}
+		});
+			//상품 금액
+			var checkPrice = cartPrice.toString().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			console.log(checkPrice);
+			//할인 금액
+			var checkDiscount = discountPrice.toString().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			console.log(checkDiscount);
+			//상품에 따른 배송비
+			var checkPost = postPrice.toString().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			console.log(checkPost);
+			//총 결제금액
+			var checkTotal = totalPrice.toString().replace(/(\d)(?=(?:\d{3})+(?!\d))/g,'$1,');
+			console.log(checkTotal);
+
+			$('.checkPrice').text(checkPrice+'원');
+			$('.checkDiscount').text('-'+checkDiscount+'원');
+			$('.checkPost').text('+'+checkPost+'원');
+			$('.checkTotal').text('+'+checkTotal+'원');
+	});
+
+	/* 장바구니 상품 삭제 */
+	$('#cartList').on('click', '.cartRemove', function(){
+		var cartCode = $(this).data("cartCode");
+		console.log(cartCode);
+		$.ajax({ type: "POST",
+       	 		 url: "/user/goods/cartRemove",
+      	 		 data: { 'cartCode' : cartCode },
+				 success : function(data){
+					 $('#cartList').load(location.href + ' #cartList');
+				 }
+		});
+	});
+	
+	/* 장바구니 선택 삭제 */
+	$('.selectDel').click(function(){
+		$('input[name=cartCheck]:checked').each(function(){
+			var cartCode = $(this).data("cartCode");
+			console.log(cartCode);
+			$.ajax({ type: "POST",
+      	 		 url: "/user/goods/cartRemove",
+     	 		 data: { 'cartCode' : cartCode },
+				 success : function(data){
+					 $('#cartList').load(location.href+' #cartList');
+				 }
+			});
+		});
+	});
+
+
+
+
+});
+
+/* 폼 제조 후 submit */
+document.querySelector('#checkoutBtn').addEventListener('click', function () {
+    let cartCheck = document.querySelectorAll('input[name="cartCheck"]:checked');
+
+    if (cartCheck.length === 0) {
+       alert('상품을 선택해 주세요');
+    } else {
+        for (const cartCheckElement of cartCheck) {
+			let goodsCode = document.createElement('input');
+			let cartAmount = document.createElement('input');
+			goodsCode.setAttribute('type', 'hidden');
+			goodsCode.setAttribute('name', 'goodsCode');
+			goodsCode.setAttribute('value', cartCheckElement.parentElement.querySelector('.goodsCode').value);
+			cartAmount.setAttribute('type', 'hidden');
+			cartAmount.setAttribute('name', 'cartAmount');
+			cartAmount.setAttribute('value', cartCheckElement.parentElement.querySelector('.cartAmount').value);
+			document.querySelector('#checkoutForm').append(goodsCode);
+			document.querySelector('#checkoutForm').append(cartAmount);
+        }
+
+		document.querySelector('#checkoutForm').submit();
+    }
+
+	/* 뒤로가기 시 폼 초기화 */
+	window.addEventListener('pageshow', function (e) {
+		if (e.persisted) {
+			let form = document.querySelector('#checkoutForm');
+			while(form.firstChild !== null) {
+				form.removeChild(form.firstChild);
+			}
+		}
+	})
+
+
+});
+</script>
+</th:block>
 </html>

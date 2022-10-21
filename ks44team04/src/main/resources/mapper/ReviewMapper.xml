@@ -9,7 +9,6 @@
 		<result column="review_list" 	property="reviewList"/>
 		<result column="user_id" 		property="userId"/>
 		<result column="like_reg_date" 	property="likeRegDate"/>
-		
 	</resultMap>
 
 	<resultMap type="ReviewComment" id="reviewCommentSersultMap">
@@ -34,9 +33,10 @@
 		<result column="like_amount" 			property="likeAmount"/>
 		<result column="grade" 					property="grade"/>
 	</resultMap>
+	
 <!-- 후기 목록  -->
 <select id="reviewList" resultMap="reviewListResultMap">
-/* 후기 목록 검색 */
+/* 후기 목록 */
 	SELECT 
 		r.review_list
 		,r.goods_list
@@ -53,6 +53,45 @@
 		tb_review AS r 
 	
 </select>
+
+<!-- 후기 등록  -->
+<insert id="reviewAdd"  parameterType="Review">
+INSERT INTO tb_review
+	(review_list
+	,goods_list
+	,buyer_id
+	,order_detail_code
+	,review_content
+	,review_img
+	,review_reg_date
+	,review_update_date
+	,save_point
+	,like_amount
+	,grade)
+	VALUES 
+		(#{reviewList}
+		,#{goodsList}
+		,#{buyerId}
+		,#{orderDetailCode}
+		,#{reviewContent}
+		,#{reviewImg}
+		,NOW()
+		,NOW()
+		,0
+		,0
+		,0)
+</insert>
+
+<!-- 후기 등록시 코드 증가  -->
+    <select id="getReviewList" resultType="String">
+    /* 신고등록시 코드 증가*/
+	SELECT 
+		review_list
+	FROM 
+		tb_review
+	ORDER BY review_list DESC LIMIT 1
+    </select>
+
 <!-- 후기목록  검색 -->
 <select id="reviewSerchList" resultMap="reviewListResultMap">
 /* 후기 목록 검색*/
@@ -70,27 +109,40 @@
 		,r.grade
 	FROM 
 		tb_review AS r 
-		<trim prefix="WHERE" prefixOverrides="AND |OR ">
-		   	<if test="sv != null and sv != ''">
-		   		${sk} LIKE CONCAT('%',#{sv},'%')
-		   	</if>
-	   </trim>
+		<trim prefix="WHERE" prefixOverrides="AND">
+	   	<if test="sv != null and sv != ''">
+	   		${sk} LIKE CONCAT('%',#{sv},'%')
+	   	</if>
+	   	<if test="fd != null and fd !='' and td != null and td !=''">
+			AND
+			r.review_reg_date <![CDATA[>]]> (#{fd})
+			AND
+			r.review_reg_date <![CDATA[<]]> (#{td})
+		</if>
+	 </trim>
 	
 </select>
+<!-- 후기  목록 삭제 -->
+<delete id="reviewListDelete" parameterType="Review">
+/* 후기  목록 삭제*/
+	DELETE 
+	FROM 
+		tb_review 
+	WHERE 
+		review_list = #{reviewList}
 
-<!-- 후기 댓글 목록 -->
-<select id="reviewComment" resultMap="reviewCommentSersultMap">
-/* 후기 댓글 목록 */
-SELECT 
-	c.review_comment_list
-	,c.review_list
-	,c.user_id
-	,c.review_comment_content
-	,c.reg_date
-	,c.modify_date
-FROM 
-	tb_review_comment AS c
-</select>
+</delete>
+<!-- 후기 댓글 목록 삭제 -->
+<delete id="reviewListCommentDelete"  parameterType="ReviewComment"> 
+/* 후기 댓글 목록 삭제*/
+	DELETE 
+	FROM 
+		tb_review_comment 
+	WHERE 
+		review_list = #{reviewList}
+
+</delete>
+
 
 
 <!-- 추천 등록시 코드 증가 -->
@@ -119,13 +171,15 @@ FROM
 
 <!-- 추천 해제  -->
 <delete id="reviewLikeDelete" parameterType="ReviewLike">
-DELETE FROM 
-	tb_review_like
-
- WHERE 
- 	review_list= #{reviewList} AND user_id = #{userId}
+	DELETE 
+	FROM 
+		tb_review_like
+	WHERE 
+ 		review_list= #{reviewList} AND user_id = #{userId}
+ 	
 </delete>   
 
+<!-- 추천수 update -->
 <update id="reviewLikeUp" parameterType="Review">
 UPDATE tb_review AS r
 	SET
@@ -137,8 +191,89 @@ UPDATE tb_review AS r
 						  l.review_list = #{reviewList})
 	WHERE review_list = #{reviewList}
 	
-
+	<selectKey keyProperty="likeAmount" resultType="int" order="AFTER">
+		SELECT
+			r.like_amount AS likeAmount
+		FROM
+			tb_review AS r
+		WHERE 
+			r.review_list = #{reviewList}
+	</selectKey>
 </update>
     
+ 
+<!-- 후기 댓글 목록 -->
+<select id="reviewComment" resultMap="reviewCommentSersultMap">
+/* 후기 댓글 목록 */
+SELECT 
+	c.review_comment_list
+	,c.review_list
+	,c.user_id
+	,c.review_comment_content
+	,c.reg_date
+	,c.modify_date
+FROM 
+	tb_review_comment AS c
+</select>   
+    
+<!-- 후기 댓글 목록 검색 -->
+ <select id="reviewCommentSaerch" parameterType="map" resultMap="reviewCommentSersultMap" fetchSize="100">
+/* 후기 댓글 목록 검색*/
+SELECT 
+	c.review_comment_list
+	,c.review_list
+	,c.user_id
+	,c.review_comment_content
+	,c.reg_date
+	,c.modify_date
+FROM 
+	tb_review_comment AS c
+	<trim prefix="WHERE" prefixOverrides="AND">
+	   	<if test="sv != null and sv != ''">
+	   		${sk} LIKE CONCAT('%',#{sv},'%')
+	   	</if>
+	   	<if test="fd != null and fd !='' and td != null and td !=''">
+			AND
+			c.reg_date <![CDATA[>]]> (#{fd})
+			AND
+			c.reg_date <![CDATA[<]]> (#{td})
+		</if>
+	 </trim>
+</select>   
+
+<!-- 후기 댓글 목록 삭제 -->
+<delete id="reviewCommentDelete"  parameterType="ReviewComment"> 
+/* 후기 댓글 목록 삭제*/
+	DELETE 
+	FROM
+		tb_review_comment 
+	WHERE 
+		review_comment_list = #{reviewCommentList}
+
+</delete>
+
+
+ <select id="userReport" parameterType="String" resultType="map">
+ /* 후기 신고 (조회) */
+	SELECT 
+		r.review_list
+		,r.goods_list
+		,r.buyer_id
+		,r.order_detail_code
+		,r.review_content
+		,r.review_img
+		,r.review_reg_date
+		,r.review_update_date
+		,r.save_point
+		,r.like_amount
+		,r.grade
+	FROM 
+		tb_review AS r 
+	WHERE 
+	 r.review_list = #{reviewList}
+	 
+	
+    </select>
+
     
 </mapper>

@@ -127,9 +127,63 @@
         where order_detail_code = #{orderDetailCode};
     </update>
 
-    <update id="setOrderDetailStatus" parameterType="String">
+    <update id="setOrderDetailStatus" statementType="CALLABLE" parameterType="String">
         call set_order_status(#{orderDetailCode}, #{orderStatus})
     </update>
+
+    <update id="setOrderDetailPost" parameterType="String">
+        update tb_order_detail
+        set post_info = #{postInfo}
+        where order_detail_code = #{orderDetailCode};
+    </update>
+    <update id="setCancelApprove" parameterType="string">
+        UPDATE tb_order_cancel
+        SET approve_date = now()
+        WHERE order_detail_code = #{orderDetailCode}
+    </update>
+    <update id="setExchangeApprove" parameterType="map">
+        UPDATE tb_order_exchange
+        SET approve_check = 'Y', approve_date = now()
+        WHERE order_detail_code = #{orderDetailCode}
+    </update>
+    <update id="setReturnApprove" parameterType="string">
+        UPDATE tb_order_return
+        SET permit_date = now()
+        WHERE order_detail_code = #{orderDetailCode}
+    </update>
+
+    <insert id="addPostInfo" parameterType="PostInfo">
+        <selectKey resultType="String" keyColumn="post_info" keyProperty="postInfo" order="BEFORE">
+            select concat(substr(max(post_info), 1, 2), lpad(cast(substr(max(post_info), 3) as unsigned) + 1, 8, 0)) as post_info
+            from tb_post_info
+        </selectKey>
+        insert into tb_post_info (post_info, post_list, reg_date, post_company_name, invoice_number)
+            values (#{postInfo}, #{postList}, now(), #{postCompanyName}, #{invoiceNumber})
+    </insert>
+
+    <select id="getContentsCount" resultType="int">
+        select count(tod.order_detail_code)
+        from tb_order_detail as tod
+                 inner join tb_goods tg
+                            on tod.goods_code = tg.goods_code
+                 inner join tb_order t
+                            on tod.order_num = t.order_num
+        where t.buyer_id = 'buyer01'
+    </select>
+
+    <!-- 페이징 테스트 -->
+    <select id="getOrderListTest" parameterType="Paging" resultMap="orderDetailResultMap">
+        select *
+        from tb_order_detail as tod
+                 inner join tb_goods tg
+                            on tod.goods_code = tg.goods_code
+                 inner join tb_order t
+                            on tod.order_num = t.order_num
+        where t.buyer_id = #{condition}
+        order by order_detail_code desc
+        limit #{pagination.startNumber}, #{contentsPerPage}
+    </select>
+    <!-- 페이징 테스트 -->
 
     <select id="getOrderList" parameterType="String" resultMap="orderDetailResultMap">
         select *
@@ -141,7 +195,7 @@
         where t.buyer_id = #{userId}
         order by order_detail_code desc
     </select>
-    <select id="getOrderListA" parameterType="String" resultMap="orderDetailResultMap">
+    <select id="getOrderListA" parameterType="map" resultMap="orderDetailResultMap">
         select *
         from tb_order_detail as tod
                  inner join tb_goods tg
@@ -149,7 +203,12 @@
                  inner join tb_order t
                             on tod.order_num = t.order_num
         where tg.seller_id = #{sellerId}
-          and tod.order_status regexp #{status}
+          <if test="status != null and status != ''">
+            and tod.order_status regexp #{status}
+          </if>
+          <if test="text != null and text != ''">
+            and ${select} regexp #{text}
+          </if>
         order by order_detail_code desc
     </select>
 
