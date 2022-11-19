@@ -8,7 +8,6 @@ import ks44team04.dto.Leave;
 import ks44team04.dto.LevelBuyerCategory;
 import ks44team04.dto.LevelSellerCategory;
 import ks44team04.dto.Login;
-import ks44team04.dto.PaymentTotal;
 import ks44team04.dto.Right;
 import ks44team04.dto.Search;
 import ks44team04.dto.Seller;
@@ -34,6 +33,24 @@ public class UserService {
         this.userMapper = userMapper;
     }
     
+    /* =============== 구매자/판매자 등급관리 시작 =============== */
+	//구매자 등급조건 누적 관리 대상 ID 목록
+	public List<String> buyerTotalList() {
+		return userMapper.buyerTotalList();
+	}
+	
+	//판매자 등급조건 누적 관리 대상 ID 목록
+	public List<String> sellerTotalList() {
+		return userMapper.sellerTotalList();
+	}
+	
+	//구매자 등급 관리 - buyer_total / tb_user / level_buyer_status
+	public int buyerLevelManage(String userId) {
+		return userMapper.buyerLevelManage(userId);
+	}
+	
+	/* =============== 구매자/판매자 등급관리 끝 =============== */
+
     
     /* =============== 검색 시작 =============== */
     //판매자 검색

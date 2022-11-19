@@ -41,7 +41,6 @@ public class UserGoodsController {
 		List<Goods> goodsList = goodsService.getGoodsList();
 		log.info("등록된 상품 리스트 ::: {}", goodsList);
 		
-		
 		//List<GoodsLargeCategory> largeCategoryList = goodsService.goodsLargeCategoryList();
 		//log.info("카테고리 대분류 리스트 ::: {}", largeCategoryList);
 		
@@ -84,12 +83,13 @@ public class UserGoodsController {
     
     //문의 등록 
 	@PostMapping("/goods")
-	public String goodsQnaAdd(GoodsQna goodsQna
+	public String goodsQnaAdd(GoodsQna goodsQna, HttpSession session
 							 ,@RequestHeader(value = "Referer") String referer
 							 ,RedirectAttributes reattr){
 		
-		goodsQna.setBuyerId("buyer01");
-		//goodsQna.setQnaStatus("답변대기");
+		String userId = (String) session.getAttribute("SID");
+		
+		goodsQna.setBuyerId(userId);
 		
 		goodsService.goodsQnaAdd(goodsQna);
 		log.info("사용자가 등록한 문의 정보 ::: {}", goodsQna);

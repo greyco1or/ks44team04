@@ -255,6 +255,12 @@
                 });
         }
 
+        function orderSearch() {
+            let selected = document.querySelector('#orderSearchSelect');
+            let text = document.querySelector('#orderSearchText');
+            getOrderList('결제|배송|구매', selected.value, text.value);
+        }
+
         function orderCheck(btn) {
             let orderDetailCode = btn.closest('tr').querySelector('.orderDetailCode').textContent
             fetch('/admin/order/check/' + orderDetailCode)

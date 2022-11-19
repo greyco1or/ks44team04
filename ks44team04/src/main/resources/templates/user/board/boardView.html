@@ -14,10 +14,19 @@
 	margin-left:auto;
 	border-top:2px solid #82ae4691;
 }
+.table2 {
+	width:800px;
+	margin-right:auto;
+	margin-left:auto;
+	border-top:2px solid #dee2e6;
+}
+.table2 thead th {
+	border-bottom:1px solid #f2f2f2;
+}
 .table tbody tr td {
 	padding: 7px 7px;
 }
-.boardAdd { 
+.boardList { 
 	margin-right: 55px;
  	right: 0px;
  	padding: 0px 10px;
@@ -29,11 +38,34 @@
 	border:none;
 	border-radius:28px;
 }
-.boardAdd:focus{ 	
+.boardList:focus{ 	
     border: none;
     outline:none;
     }
-
+.commentAdd {
+	vertical-align: middle;
+	width: 50px;
+	height: 30px;
+	font-size: 15px;
+	background-color: #dbe6c4;
+	border:none;
+	border-radius:28px;
+	cursor:pointer;
+}
+.commentAdd:focus{ 	
+    border: none;
+    outline:none;
+}
+.commentInput{
+	resize: none;
+	vertical-align: middle;
+	border:1px solid #b6b6b6;
+	border-radius:5px;
+    overflow-y: hidden;
+}
+.commentInput:focus{
+	outline:none;
+}
 </style>
 </th:block>
 
@@ -51,33 +83,65 @@
         <table class="table" th:object="${boardInfo}">
 			<thead>
 				<tr>
-					<th colspan="7" th:text="*{boardTitle}" style="font-size:17px; text-align:left;"></th>
+					<th colspan="9" th:text="*{boardTitle}" style="font-size:17px; text-align:left;"></th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr class="d-flex">
-					<td class="col-md-5"></td>
-					<td class="col-md-1">작성일</td>
-					<td class="col-md-2" th:text="*{#strings.substring(regDate,0,10)}"></td>
-					<td class="col-md-1">조회수</td>
-					<td class="col-md-1" th:text="*{viewAmount}"></td>
-					<td class="col-md-1">좋아요</td>
-					<td class="col-md-1" th:text="*{likeAmount}"></td>
+				<tr>
+					<td class="col-3"></td>
+					<td class="col-1">작성자</td>
+					<td class="col-1" th:text="*{userInfo.userNickname}"></td>
+					<td class="col-1">작성일</td>
+					<td class="col-2" th:text="*{#strings.substring(regDate,0,10)}"></td>
+					<td class="col-1">조회수</td>
+					<td class="col-1" th:text="*{viewAmount}"></td>
+					<td class="col-1">좋아요</td>
+					<td class="col-1" th:text="*{likeAmount}"></td>
 				</tr>
 				<tr style="height:400px;">
-					<td class="d-flex" colspan="7" style="border-bottom:1px solid #dee2e6 !important;">
+					<td colspan="9">
 						<div th:utext="*{boardContent}" style="height:400px; text-align:left;"></div>
 					</td>
 				</tr>
 			</tbody>
-			<tfoot>
-				<tr>
-					<td style="text-align:left; font-size:18px;">댓글</td>
-				</tr>
-			</tfoot>
 		</table>
+		
+		<div style="width:1000px; margin-left:auto; margin-right:auto;">
+			<div style="text-align:left; font-size:18px; font-weight:500; padding-top:10px; padding-left:10px; border-top:2px solid #dee2e6;">댓글</div>
+		</div>
+		<div id="commentList">
+			<div th:if="${not #lists.isEmpty(boardInfo.commentList)}" th:each="bc : ${boardInfo.commentList}" style="width:1000px; margin-left:auto; margin-right:auto; margin-top:10px; border-top:1px solid #f2f2f2;">
+				<div class="row" style="width:1000px; padding-left:24px; margin-top:10px;">
+					<div th:text="${bc.userInfo.userNickname}" style="font-weight:500;"></div>&nbsp;&nbsp;
+					<div th:text="${bc.coRegDate}" style="font-size:13px; color:#b6b6b6;"></div>
+					<a href="#" class="commentModify" id="modifyBtn" th:data-board-comment="${bc.boardComment}" style="color:#a8a8a8; font-weight:300; width:78%; text-align:right;">수정</a>&nbsp;&nbsp;
+					<a href="#" class="commentRemove" id="cancelBtn" th:data-board-comment="${bc.boardComment}" style="color:#a8a8a8; font-weight:300;">삭제</a>
+				</div>
+					<div style="padding:0px 10px;">
+						<div id="commentContent" th:text="${bc.commentContent}"></div>
+					</div>
+				</div>
+				<div th:each="bc : ${boardInfo.commentList}" style="margin-top:10px; text-align: center;">
+					<th:block th:if="${bc.commentContent == null}">
+						<span>등록된 댓글이 없습니다.</span>
+					</th:block>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div style="width:1000px; margin-left:auto; margin-right:auto; border-top:1px solid #f2f2f2;">
+			<div style="font-weight:500; padding-top:10px; padding-left:10px;">댓글쓰기</div>
+			<div style="padding-left:10px;">
+			<input type="hidden" id="boardCode" th:value="${boardInfo.boardCode}">
+			<textarea class="commentInput" id="commentInput" rows="1" cols="120" onkeydown="resize(this)" onkeyup="resize(this)"></textarea>
+			<button class="commentAdd">등록</button>
+			</div>
+		</div>
+		
+		<hr style="width:1000px; margin-top:30px;">
 		<div style="position: relative; width: 100%; height: 40px; display: flex; margin-top:10px;">
-			<button type="button" class="boardAdd">목록</button>
+			<button type="button" class="boardList">목록</button>
 		</div>
 		<hr style="margin-top:50px;">
 		
@@ -87,15 +151,87 @@
 <th:block layout:fragment="customJsScript">
 <th:block th:replace="fragments/userJs :: datatablesFragment"></th:block>
 <script th:inline="javascript">
-//<a th:href="@{/user/board/boardAdd}">
-    $('.boardAdd').on('click', function(){
+
+	// textarea 입력시 높이 늘어나게 
+	function resize(obj) {
+	    obj.style.height = '1px';
+	    obj.style.height = (12 + obj.scrollHeight) + 'px';
+	}
+	
+	//댓글 등록
+	$('.commentAdd').on('click', function(){
+		var commentInput = $("#commentInput").val();
+		var boardCode = $("#boardCode").val()
+		console.log(commentInput);
+		console.log(boardCode);
+		
     	if([[${session.SID}]] == null){
     		alert('로그인 후 이용가능합니다.');
     		location.href='/user/user/login';
     	}else{
-    		location.href='/user/board/boardAdd';
+			if(commentInput == undefined || commentInput == ''){
+				alert("댓글 내용을 입력해주세요.");
+			}else {
+			    $.ajax({
+			        url: "/user/board/commentAdd",
+			        type: "post",
+			        data: { 'commentContent' : commentInput,
+			        		boardCode }
+			    })
+			        .done(function(result){
+			        		$('#commentList').load(location.href+' #commentList');
+			        		$("#commentInput").val("");
+			        });
+			}
     	}
-    });
+	});
+
+	
+	//댓글 삭제
+	$('#commentList').on('click', '.commentRemove', function(e){
+		e.preventDefault();
+		var boardComment = $(this).data("boardComment");
+		console.log(boardComment);
+		
+		$.ajax({
+		        url: "/user/board/commentRemove",
+		        type: "post",
+		        data: { 'boardComment' : boardComment }
+		})
+		        .done(function(result){
+		        		$('#commentList').load(window.location.href+' #commentList');
+		        });
+	});
+	
+	//댓글 수정
+	//$('.commentModify').each(function(){
+		$('.commentModify').on('click', function(e){
+	//$('#commentList').on('click', '.commentModify', function(e){
+		e.preventDefault();
+		var boardComment = $(this).data("boardComment");
+		console.log(boardComment);
+		var commentContent = $("#commentContent").text();
+		console.log(commentContent);
+		
+		var str="";
+		str += '<textarea class="commentInput" id="commentInput" rows="1" cols="115" onkeydown="resize(this)" onkeyup="resize(this)">';
+		$('#commentContent').html(str);
+		$('#commentInput').val(commentContent);
+		
+		
+		
+		var str2="";
+		str2 += '완료';
+		$('#modifyBtn').html(str2);
+		
+		var str3="";
+		str3 += '취소';
+		$('#cancelBtn').html(str3);
+	});
+	// });
+	
+	
+
 </script>
 </th:block>
 </html>

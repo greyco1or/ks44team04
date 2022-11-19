@@ -9,19 +9,17 @@ import ks44team04.dto.Leave;
 import ks44team04.dto.LevelBuyerCategory;
 import ks44team04.dto.LevelSellerCategory;
 import ks44team04.dto.Login;
-import ks44team04.dto.PaymentTotal;
 import ks44team04.dto.Right;
 import ks44team04.dto.Search;
 import ks44team04.dto.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -30,7 +28,6 @@ import org.thymeleaf.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
@@ -169,6 +166,15 @@ public class UserController {
 		return cnt;
 	}
 	
+	// 10/10 판매자 이메일 중복체크
+	@GetMapping("/user/emailCheckS")
+	@ResponseBody
+	public int emailCheckS(@RequestParam(name="storeEmail") String storeEmail) {
+		int cnt = userService.emailCheckS(storeEmail);
+		
+		return cnt;
+	}
+	
 	// 10/10 판매자 상호명 중복체크
 	@GetMapping("/user/storeNameCheck")
 	@ResponseBody
@@ -208,15 +214,6 @@ public class UserController {
 		model.addAttribute("goodsLargeCategory", goodsLargeCategory);
 		
 		return "admin/user/addSeller";
-	}
-	
-	// 10/10 판매자 이메일 중복체크
-	@GetMapping("/user/emailCheckS")
-	@ResponseBody
-	public int emailCheckS(@RequestParam(name="storeEmail") String storeEmail) {
-		int cnt = userService.emailCheckS(storeEmail);
-		
-		return cnt;
 	}
     
 	// 10/8 회원 휴대폰번호 중복체크
@@ -478,6 +475,22 @@ public class UserController {
         session.invalidate();
         return "redirect:/admin";
     }
+    
+    /*
+    @RequestMapping(value = "/asd", method = RequestMethod.GET)
+    public void levelAccum() {
+    	//관리 대상 아이디 List
+    	List<String> buyerTotalList = userService.buyerTotalList();
+    	//List<String> sellerTotalList = userService.sellerTotalList();
+        
+    	//구매자 등급 관리 - buyer_total / tb_user / level_buyer_status
+    	for(String buyerId : buyerTotalList) {
+    		int a = userService.buyerLevelManage(buyerId);
+    		System.out.println(a);
+    	}
+    	//판매자 등급 고나리 - seller_total / tb_user / level_seller_status
+	}
+	*/
     
   
 }

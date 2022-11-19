@@ -1,6 +1,7 @@
 package ks44team04.user.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import ks44team04.dto.Review;
@@ -70,21 +72,29 @@ public class UserReviewController {
 		return review.getLikeAmount();
 	}
 	
-	@GetMapping("/review/reviewAdd")
-	public String reviewAdd(Review review) {
-		
-		//코드 증가 
-		String reviewListCode = reviewService.getReviewListCode();
-		reviewListCode = CodeIndex.codeIndex(reviewListCode, 6);
-		
-		review.setReviewList(reviewListCode);
-		log.info("---------------------------------리뷰 코드값 ", reviewListCode);
-		reviewService.reviewAdd(review);
-		
-		return "null";
-	}
+	/*
+	 * //후기 댓글 특정 목록
+	 * 
+	 * @GetMapping("/review/reviewCommentList") public String
+	 * reviewCommintList(@RequestParam(value = "reviewList",required = false) String
+	 * reviewList, Model model) {
+	 * 
+	 * ReviewComment reviewCommintList =
+	 * reviewService.reviewCommnetList(reviewList);
+	 * model.addAttribute("reviewCommintList", reviewCommintList); return null; }
+	 */
+	//입고등록 모달 - 특정 상품코드 조회
+
+	  @GetMapping("/review/reviewCommentList")
+	  @ResponseBody
+	  public List<Map<String, Object>>reviewCommnetList(@RequestParam(value="reviewList") String reviewList){
+
+	List<Map<String, Object>> reviewCommnetList = reviewService.reviewCommnetList(reviewList);
+
+	     return reviewCommnetList;
+	  }
 	
-	
+	 
 
 
 }
